@@ -1,0 +1,20 @@
+{% extends 'user/commons/nav_user.html' %}
+{% load static %}
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'user/css/minhas_solic.css' %}">
+{% endblock css %}
+
+{% block content %}
+
+{% include 'user/include/link_menu.html' %}
+
+<div id="container_error"></div>
+
+<div id="pesquisas_solic"></div>
+
+{% endblock content %}
+
+{% block js %}
+  <script src="{% static 'user/js/get_my_solic_pesq.js' %}"></script>
+{% endblock js %}

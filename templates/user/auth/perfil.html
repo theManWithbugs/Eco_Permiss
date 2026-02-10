@@ -1,0 +1,99 @@
+{% extends 'user/commons/nav_user.html' %}
+{% load static %}
+
+{% block css %}{% endblock css %}
+
+{% block content %}
+
+<div class="container">
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <div class="row gap-1">
+        <div class="col-md-auto">
+          <h4 class="mb-0">{{ request.user.username }}</h4>
+        </div>
+        <div class="col-md-auto ms-auto">
+          <a href="{% url 'user:editar_dados' %}" class="btn btn-outline-secondary">
+            Editar</a>
+        </div>
+        <div class="col-md-auto">
+          <a href="{% url 'user:logout' %}" class="btn btn-outline-danger">
+            Sair</a>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h5 class="text-secondary mb-3">Informações Pessoais</h5>
+      <table class="table table-hover">
+        <tbody>
+          <tr>
+            <th scope="row">Nome Completo</th>
+            <td>{{ user.nome }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Sexo</th>
+            <td>
+              {% if user.sexo == 'M' %}
+              Masculino
+              {% else %}
+              Feminino
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Estado</th>
+            <td>{{ user.estado }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Município</th>
+            <td>{{ user.municipio }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Endereço</th>
+            <td>{{ user.endereco }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Celular</th>
+            <td>{{ user.celular }}</td>
+          </tr>
+          <tr>
+            <th scope="row">RG</th>
+            <td>{{ user.rg }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Orgão Emissor</th>
+            <td>{{ user.org_emiss }}</td>
+          </tr>
+          <tr>
+            <th scope="row">CPF</th>
+            <td>{{ user.cpf }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Telefone Fixo</th>
+            <td>
+              {% if user.telefone_fixo %}
+              {{ user.telefone_fixo }}
+              {% else %}
+              não informado
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">CEP</th>
+            <td>{{ user.cep }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Profissão</th>
+            <td>{{ user.profis }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Email</th>
+            <td>{{ user.email }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

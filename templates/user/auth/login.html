@@ -1,0 +1,60 @@
+{% load static %}
+<html>
+  <head>
+    <!-- BS5 -->
+    <link rel="stylesheet" href="{% static 'global/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'global/css/bootstrap-icons.min.css' %}">
+
+    <!-- Css principal -->
+    <link rel="stylesheet" href="{% static 'user/css/form_login.css' %}">
+
+    <!-- Animate css -->
+    <link rel="stylesheet" href="{% static 'global/css/animate.min.css' %}">
+
+    <!-- Icone -->
+    <link rel="shotcut icon" href="{% static 'global/img/eoc_pers_icone_sfundo.png' %}" type="image/png">
+
+    <title>LOGIN</title>
+  </head>
+
+  <body>
+
+    {% if messages %}
+      <div class="d-flex justify-content-center animate__animated animate__fadeInDown">
+        <div class="w-50">{% include 'user/include/alert_error_message.html' %}</div>
+      </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-center mt-4">
+      <div class="container">
+        <div class="heading">
+          <img src="{% static 'global/img/eoc_pers_icone_sfundo.png' %}" width="135px">
+        </div>
+        <form class="form" action="{% url 'user:login' %}" method="post">
+          {% csrf_token %}
+          <input
+            placeholder="Usuario"
+            id="usuario"
+            name="username"
+            type="text"
+            class="input"
+            required=""
+          />
+          <input
+            placeholder="Senha"
+            id="password"
+            name="password"
+            type="password"
+            class="input"
+            required=""
+          />
+          <input value="Entrar" type="submit" class="login-button" />
+        </form>
+      </div>
+    </div>
+
+  </body>
+</html>
+
+<!-- BS5 -->
+<script src="{% static 'global/js/bootstrap.bundle.min.js' %}"></script>

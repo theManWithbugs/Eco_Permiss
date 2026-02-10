@@ -1,0 +1,387 @@
+{% extends 'user/commons/nav_user.html' %}
+{% load static %}
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'user/css/btn_white.css' %}">
+  <link rel="stylesheet" href="{% static 'user/css/add_button.css' %}">
+  <link rel="stylesheet" href="{% static 'user/css/bg_efect_sheet.css' %}">
+  <link rel="stylesheet" href="{% static 'user/css/solic_choice_btn.css' %}">
+{% endblock css %}
+
+{% block content %}
+
+<div class="container_sheet">
+  <div class="p-2">
+    <div class="bg-light px-4 py-3 rounded shadow-sm w-50 text-center" style="border-left: solid 2px black;">
+      <h3 class="text-dark fw-bold mb-0" style="font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;">
+        Selecione o tipo de solicitação
+      </h3>
+    </div>
+
+    <div class="mb-2 mt-3">
+      <button onclick="mostrar_formulario('solic_pesq')" class="btn_choice" id="btn_pesq">
+        Solicitar Pesquisa</button>
+      <button onclick="mostrar_formulario('aut_ugai')" class="btn_choice ms-2" id="btn_ugai">
+        Autorização UGAI</button>
+    </div>
+  </div>
+
+  <div style="display: none;" id="solic_pesq" class="p-2">
+      <div class="mb-4 bg-white p-2 rounded">
+        <h4 class="fw-bold text-primary">Solicitação de Pesquisa</h4>
+        <p class="text-muted">Preencha os campos abaixo para registrar sua solicitação de pesquisa</p>
+        <strong class="text-bold fs-5">Campos Obrigatorios ( <span class="text-danger">*</span> )</strong>
+      </div>
+    <form action="{% url 'user:realizar_solic' %}" method="post">
+      {% csrf_token %}
+
+      {% if form_solic.non_field_errors %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ form_solic.non_field_errors }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endif %}
+
+      <div class="row mb-3 main_form">
+          <div class="col-md-12">
+              <span class="text-danger">*</span>
+              {{ form_solic.acao_realizada.label_tag }}
+              {{ form_solic.acao_realizada }}
+              {% for error in form_solic.acao_realizada.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+      </div>
+
+      <div class="row mb-3 main_form">
+          <div class="col-md-12">
+              <span class="text-danger">*</span>
+              {{ form_solic.unidade_cons.label_tag }}
+              {{ form_solic.unidade_cons }}
+              {% for error in form_solic.unidade_cons.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+      </div>
+
+      <div class="row mb-3 main_form">
+          <div class="col-md-4">
+              <span class="text-danger">*</span>
+              {{ form_solic.tipo_solic.label_tag }}
+              {{ form_solic.tipo_solic }}
+              {% for error in form_solic.tipo_solic.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+
+          <div class="col-md-4 main_form">
+              <span class="text-danger">*</span>
+              {{ form_solic.foto.label_tag }}
+              {{ form_solic.foto }}
+              {% for error in form_solic.foto.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+
+          <div class="col-md-4 main_form">
+              <span class="text-danger">*</span>
+              {{ form_solic.licenca_inst.label_tag }}
+              {{ form_solic.licenca_inst }}
+              {% for error in form_solic.licenca_inst.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+      </div>
+
+      <div class="row mb-3 main_form">
+          <div class="col-md-6">
+              <span class="text-danger">*</span>
+              {{ form_solic.retorno_comuni.label_tag }}
+              {{ form_solic.retorno_comuni }}
+              {% for error in form_solic.retorno_comuni.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+
+          <div class="col-md-6">
+              <span class="text-danger">*</span>
+              {{ form_solic.area_atuacao.label_tag }}
+              {{ form_solic.area_atuacao }}
+              {% for error in form_solic.area_atuacao.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+      </div>
+
+      <div class="row mb-3 main_form">
+          <div class="col-md-6">
+              <span class="text-danger">*</span>
+              {{ form_solic.inicio_atividade.label_tag }}
+              {{ form_solic.inicio_atividade }}
+              {% for error in form_solic.inicio_atividade.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+
+          <div class="col-md-6">
+              <span class="text-danger">*</span>
+              {{ form_solic.final_atividade.label_tag }}
+              {{ form_solic.final_atividade }}
+              {% for error in form_solic.final_atividade.errors %}
+              <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+          </div>
+      </div>
+
+      <hr>
+      <div class="d-flex justify-content-center rounded mb-1">
+          <div class="p-1 rounded text-center" style="width: 50%">
+              <h5>Membros da Equipe</h5>
+          </div>
+      </div>
+
+      <div class="container">
+          <div id="membros_formset">
+
+              {{ formset.management_form }}
+
+              {% if formset.non_form_errors %}
+              <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+              {% endif %}
+
+              {% for subform in formset %}
+              <div class="card mb-2 p-3 inline_form">
+                  {# include hidden fields (id, DELETE, etc) required by formset plugin #}
+                  {% for hidden in subform.hidden_fields %}
+                  {{ hidden }}
+                  {% endfor %}
+
+                  <div class="container mb-2">
+                      <div class="row">
+                          <div class="col-md-4">
+                              {{ subform.nome.label_tag }}
+                              {{ subform.nome }}
+                              {% for error in subform.nome.errors %}
+                              <div class="text-danger small">{{ error }}</div>
+                              {% endfor %}
+                          </div>
+
+                          <div class="col-md-4">
+                              {{ subform.rg.label_tag }}
+                              {{ subform.rg }}
+                              {% for error in subform.rg.errors %}
+                              <div class="text-danger small">{{ error }}</div>
+                              {% endfor %}
+                          </div>
+
+                          <div class="col-md-4">
+                              {{ subform.cpf.label_tag }}
+                              {{ subform.cpf }}
+                              {% for error in subform.cpf.errors %}
+                              <div class="text-danger small">{{ error }}</div>
+                              {% endfor %}
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="container">
+                      {{ subform.instituicao.label_tag }}
+                      {{ subform.instituicao }}
+                      {% for error in subform.instituicao.errors %}
+                      <div class="text-danger small">{{ error }}</div>
+                      {% endfor %}
+                  </div>
+              </div>
+              {% endfor %}
+          </div>
+      </div>
+        <hr>
+
+      <div class="container py-3 mb-2 bg-white" style="overflow-y: scroll; height: 120px;">
+        <p>
+          Eu <strong>{{ dados_user.nome }}</strong> portador do CPF <strong>{{ dados_user.cpf }}</strong>
+          pesquisador responsável pela execução do projeto, vinculado a institução SEMA-AC a ser realizado na Unidade de
+          Conservação assumo o compromisso junto ao Departamento de Unidades de conservação/Secretaria de Estado do Meio Ambiente (DEUC/ SEMA) de cumprir as obrigações abaixo listadas:
+        </p>
+        <p>
+          1. Repassar informações à DEUC/SEMA sobre o referido projeto de minha responsabilidade, na forma de
+          tese, dissertação, monografia, artigo, relatório parcial, relatório final, registro fotográfico, entre outros,
+          conforme compromisso assumido no ato da solicitação, sob pena das sanções
+          previstas em lei;
+        </p>
+        <p>
+          2. Entregar à DEUC/SEMA os relatórios parciais e o relatório final, contendo os resultados da pesquisa, em
+          meio impresso e digital, no prazo de 60 (sessenta) dias após conclusão do projeto;
+        </p>
+        <p>
+          3. Encaminhar à DEUC/SEMA a declaração do responsável pela coleção científica na qual foi depositado o
+          material coletado durante a pesquisa.
+        </p>
+        <p>
+          4. Todos os membros da equipe devem assinar o termo de boas práticas, concordando com todos os termos de
+          boa conduta dentro da Unidade de Conservação a qual será realizada a pesquisa científica.
+        </p>
+      </div>
+
+      <div style="overflow-y: scroll; height: 100px;" class="bg-white border border-1">
+        <h5>TERMO DE BOAS PRÁTICAS:</h5>
+          <p>
+            Assumo a responsabilidade solidária entre os pesquisadores que compõem essa equipe e a instituição a que o
+            referido projeto está vinculado sobre eventuais danos causados à Unidade de Conservação.
+            Estou ciente de que o não cumprimento das obrigações constantes na Instrução Normativa que regulamenta a
+            pesquisa no Estado do Acre e nos demais instrumentos legais que regulamentam a matéria suspende a
+            autorização de outros projetos em Unidades de Conservação estaduais solicitadas por mim ou pela instituição
+            da qual estou vinculado.
+            Estou ciente de que, em caso de descumprimento das obrigações constantes nesse termo de compromisso, a
+            instituição à qual estou vinculado fica obrigada a cumprir as obrigações firmadas.
+          </p>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-outline-success mt-3" name="form_type" value="solic_pesq">Concluido
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" fill="currentColor" class="bi bi-arrow-right-square" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div style="display: none;" id="aut_ugai" class="p-2">
+    <div class="mb-4 bg-white p-2 rounded">
+      <h4 class="fw-bold text-primary">Autorização para uso de UGAI</h4>
+      <p class="text-muted">Preencha os campos abaixo para registrar sua solicitação</p>
+      <strong class="text-bold fs-5">Campos Obrigatorios ( <span class="text-danger">*</span> )</strong>
+    </div>
+    <form action="{% url 'user:realizar_solic' %}" method="post">
+      {% csrf_token %}
+
+      {% if form_ugai.non_field_errors %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ form_ugai.non_field_errors }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endif %}
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <span class="text-danger">*</span>
+          {{ form_ugai.ugai.label_tag }}
+          {{ form_ugai.ugai }}
+          {% for error in form_ugai.ugai.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          {{ form_ugai.instituicao.label_tag }}
+          {{ form_ugai.instituicao }}
+          {% for error in form_ugai.instituicao.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="col-md-4">
+          {{ form_ugai.setor.label_tag }}
+          {{ form_ugai.setor }}
+          {% for error in form_ugai.setor.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="col-md-4">
+          {{ form_ugai.cargo.label_tag }}
+          {{ form_ugai.cargo }}
+          {% for error in form_ugai.cargo.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <span class="text-danger">*</span>
+          {{ form_ugai.ativ_desenv.label_tag }}
+          {{ form_ugai.ativ_desenv }}
+          {% for error in form_ugai.ativ_desenv.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="col-md-6">
+          <span class="text-danger">*</span>
+          {{ form_ugai.publico_alvo.label_tag }}
+          {{ form_ugai.publico_alvo }}
+          {% for error in form_ugai.publico_alvo.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <span class="text-danger">*</span>
+          {{ form_ugai.data_inicio.label_tag }}
+          {{ form_ugai.data_inicio }}
+          {% for error in form_ugai.data_inicio.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="col-md-6">
+          <span class="text-danger">*</span>
+          {{ form_ugai.data_final.label_tag }}
+          {{ form_ugai.data_final }}
+          {% for error in form_ugai.data_final.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <p><strong>Observação: Fica ciente de que a solicitação passará por análise, passível de
+      deferimento ou indeferimento pela SEMA</strong></p>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-outline-success mt-3"
+          name="form_type" value="aut_ugai">Concluido
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" fill="currentColor" class="bi bi-arrow-right-square" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block js %}
+  <script src="{% static 'global/js/link_menu_solic.js' %}"></script>
+  <script src="{% static 'global/js/jquery_3.7.1.js' %}"></script>
+  <script src="{% static 'global/js/jquery.formset.js' %}"></script>
+  <script type="text/javascript">
+      $(function () {
+          // Initialize formset
+          $('#membros_formset .inline_form').formset({
+              prefix: '{{ formset.prefix }}',
+              deleteText: '',
+              addText: '<button type="button" class="cssbuttons-io-button center-svg" aria-label="Adicionar membro"><svg height="20" width="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M0 0h24v24H0z" fill="none"></path><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="currentColor"></path></svg></button>',
+              formCssClass: 'me-5',
+
+              added: function (row) {
+                  // Apply styling to new form
+                  $(row).css({
+                      'border': '1px solid #ddd',
+                      'padding': '10px',
+                      'margin-bottom': '10px',
+                      'border-radius': '5px',
+                      'background-color': '#FFFFFF',
+                      'row-gap': '10px',
+                  });
+              }
+          });
+      });
+  </script>
+{% endblock js %}

@@ -1,0 +1,32 @@
+.white_button {
+  --button_radius: 0.90em;
+  --button_color: #e8e8e8;
+  --button_outline_color: #000000;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--button_radius);
+  background: var(--button_outline_color);
+  text-decoration: none;
+}
+
+.white_button .button_top_menu {
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid var(--button_outline_color);
+  border-radius: var(--button_radius);
+  padding: 0.75em 1.5em;
+  background: var(--button_color);
+  color: var(--button_outline_color);
+  transform: translateY(-0.2em);
+  transition: transform 0.1s ease;
+}
+
+.white_button:hover .button_top_menu {
+  transform: translateY(-0.33em);
+}
+
+.white_button:active .button_top_menu {
+  transform: translateY(0);
+}
