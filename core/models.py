@@ -165,5 +165,12 @@ class SolicitacaoUgais(models.Model):
     def __str__(self):
         return f"{self.ugai}"
 
+    def save(self, *args, **kwargs):
+        for field in self._meta.fields:
+            value = getattr(self, field.name)
+            if isinstance(field, models.CharField) and value is not None:
+                setattr(self, field.name, value.upper())
+        super().save(*args, **kwargs)
+
     class Meta:
         db_table = "solic_ugai"

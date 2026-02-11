@@ -35,9 +35,30 @@ def dados_pessoais_required(view_func):
 
     return wrapper
 
+# def has_permission_pesq(view_func):
+#     @wraps(view_func)
+#     def wrapper(request, *args, **kwargs):
+
+#         #Id vem por meio de kwargs
+#         pesquisa_id = kwargs.get('id')
+
+#         pesquisa = get_object_or_404(DadosSolicPesquisa, id=pesquisa_id)
+
+#         if pesquisa.user_solic.id != request.user.id:
+#             return redirect('user:info_pesq')
+
+#         return view_func(request, *args, **kwargs)
+
+#     return wrapper
+
 def logoutView(request):
     auth_logout(request)
     return redirect('user:login')
+
+@login_required
+def home(request):
+    template_name = 'user/commons/home.html'
+    return render(request, template_name)
 
 def login_view(request):
   template_name = 'user/auth/login.html'
@@ -116,11 +137,6 @@ def editar_dados_pss(request):
     }
 
     return render(request, template_name, context)
-
-@login_required
-def home(request):
-    template_name = 'user/commons/home.html'
-    return render(request, template_name)
 
 @login_required
 @dados_pessoais_required
@@ -214,28 +230,104 @@ def info_pesquisa(request, id):
     template_name = 'user/include/info_pesq.html'
 
     try:
-        id_uuid = id if isinstance(id, UUID) else UUID(str(id))
+        UUID(str(id))
     except (ValueError, TypeError):
+        messages.error(request, "Erro de segurança acesso negado!")
         return redirect("user:solic_pesq_user")
 
-    if id_uuid != request.user.id:
-        return redirect("user:solic_pesq_user")
+    obj = DadosSolicPesquisa.objects.filter(id=id)
+    documentos = ArquivosRelFinal.objects.filter(pesquisa=obj.first())
+    membro_equip = MembroEquipe.objects.filter(pesquisa=obj.first())
 
-    return render(request, template_name)
+    obj_ = get_object_or_404(DadosSolicPesquisa, id=id)
+    if obj_.user_solic.id != request.user.id:
+        messages.error(request, "Você não tem permissão para acessar esta informação")
+        return redirect('user:solic_pesq_user')
+
+    form = Arq_Rel_Form(request.POST or None, request.FILES or None)
+
+    for x in obj:
+        inicio = x.inicio_atividade
+        final = x.final_atividade
+
+    if inicio and final:
+        duracao_pesq = calcular_data(str(inicio), str(final))
+
+    if request.method == 'POST':
+        if form.is_valid():
+            arq_pesquisa = form.save(commit=False)
+            arq_pesquisa.pesquisa = obj.first()
+
+            caminho_doc = str(arq_pesquisa.documento)
+            caminho_doc = caminho_doc.split('.')
+            doc_type = caminho_doc[-1]
+
+            if doc_type != 'pdf':
+                messages.error(request, 'Arquivos aceitos apenas em formato pdf!')
+                return redirect('info_pesquisa', id)
+
+            #Salva o arquivo
+            arq_pesquisa.save()
+
+            messages.success(request, 'Arquivo anexado com sucesso!')
+            return redirect('user:info_pesq', id)
+        else:
+            # print(f"Erros do form: {form.errors}")
+            messages.error(request, 'Erro ao tentar salvar!')
+
+    context = {
+        'obj': obj,
+        'documentos': documentos,
+        'duracao_pesq': duracao_pesq,
+        'membro_equip': membro_equip,
+    }
+
+    return render(request, template_name, context)
+
+#Only action
+@login_required
+def excluir_arq(request, id):
+    pesquisa = get_object_or_404(DadosSolicPesquisa, id=id)
+    if request.method == 'POST':
+        documento_id = request.POST.get('documento_id')
+
+        if documento_id:
+            try:
+                arquivo = ArquivosRelFinal.objects.get(id=documento_id)
+                if pesquisa:
+
+                    documentos_associados = ArquivosRelFinal.objects.filter(id=documento_id)
+                    for doc in documentos_associados:
+                        doc.delete_documento()
+
+                arquivo.delete_documento()
+
+                messages.success(request, 'Arquivo Excluido com sucesso!')
+            except ArquivosRelFinal.DoesNotExist:
+                messages.error(request, 'Documento não encontrado!')
+
+    return redirect('user:info_pesq', id)
 
 @login_required
 def info_ugai(request, id):
     template_name = 'user/include/info_ugai.html'
 
     try:
-        id_uuid = id if isinstance(id, UUID) else UUID(str(id))
+        UUID(str(id))
     except (ValueError, TypeError):
+        messages.error(request, "Erro de segurança acesso negado!")
         return redirect("user:solic_ugai_user")
 
-    if id_uuid != request.user.id:
-        return redirect("user:solic_ugai_user")
+    solic_ugai = get_object_or_404(SolicitacaoUgais, id=id)
+    if solic_ugai.user_solic.id != request.user.id:
+        messages.error(request, "Você não tem permissão para acessar esta informação")
+        return redirect('user:solic_ugai_user')
 
-    return render(request, template_name)
+    context = {
+        'obj': solic_ugai
+    }
+
+    return render(request, template_name, context)
 
 @login_required
 def minhas_solic_pesq(request):

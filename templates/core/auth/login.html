@@ -1,1 +1,64 @@
-<h5>Login de administrador</h5>
+{% load static %}
+<html>
+
+<head>
+  <link rel="stylesheet" href="{% static 'manager/css/input_login.css' %}">
+
+  <!-- Animate CSS -->
+  <link rel="stylesheet" href="{% static 'global/css/animate.min.css' %}">
+
+  <!-- BS5 -->
+  <link rel="stylesheet" href="{% static 'global/css/bootstrap.min.css' %}">
+</head>
+
+<body>
+
+  {% if messages %}
+    <div class="d-flex justify-content-center animate__animated animate__fadeInDown container">
+      <div>{% include 'user/include/alert_error_message.html' %}</div>
+    </div>
+  {% endif %}
+
+  <div class="container" style="margin-top: 6rem; backdrop-filter: blur(50px);">
+    <div>
+      <div class="container">
+        <form action="{% url 'manager:login' %}" method="post">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-8 d-flex justify-content-center">
+              <img src="{% static 'manager/img/dashboard_icon.png' %}" width="500px">
+            </div>
+
+            <div class="col-md-4 bg-dark p-3">
+              <div class="mt-5 container align-items-center">
+                <div style="margin-top: 4rem;">
+                  <div class="container">
+                    <input required="" type="text" name="username" class="input">
+                    <label class="label">Usuario</label>
+                  </div>
+                  <br>
+                  <div class="container">
+                    <input required="" type="password" name="password" class="input">
+                    <label class="label">Senha</label>
+                  </div>
+                </div>
+
+                <div class="mt-5">
+                  <button class="btn btn-secondary">LOGIN</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- BS5 -->
+  <script src="{% static 'global/js/bootstrap.bundle.min.js' %}"></script>
+
+  <!-- Sweet alert -->
+  <script src="{% static 'global/js/sweetalert2@11.js' %}"></script>
+</body>
+
+</html>

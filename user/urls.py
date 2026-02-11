@@ -24,6 +24,8 @@ urlpatterns = [
   #Renderizar solicitações de ugai
   path('minhas_solic_ugai/', views.minhas_solic_ugai, name='solic_ugai_user'),
 
+  path('excluir_arq/<str:id>/', views.excluir_arq, name='excluir_arq'),
+
   path('info_pesquisas/<str:id>/', views.info_pesquisa, name='info_pesq'),
   path('info_ugai/<str:id>/', views.info_ugai, name='info_ugai'),
   #-----------------------------------------------------------------------#

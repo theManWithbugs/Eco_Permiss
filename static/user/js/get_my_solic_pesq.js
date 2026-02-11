@@ -30,7 +30,7 @@
       const link = document.createElement("a");
       link.textContent = "Ver detalhes";
       link.href =
-        `${window.location.origin}${target_url}${element.user_solic}/`;
+        `${window.location.origin}${target_url}${element.id}/`;
 
       const partesData = element.data_solicitacao.split("-");
       const data = document.createElement("p");
@@ -49,8 +49,6 @@
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data.objs);
-
       render_solic_pesq(data.objs);
     })
     .catch(error => {

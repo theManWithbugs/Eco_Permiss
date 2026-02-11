@@ -80,3 +80,14 @@ class Solic_Ugai(forms.ModelForm):
         'class': 'form-control form-control',
         'type': 'date',
       })
+
+class Arq_Rel_Form(forms.ModelForm):
+  class Meta:
+    model = ArquivosRelFinal
+    fields = ['documento']
+
+  def __init__(self, *args, **kwargs):
+    super(Arq_Rel_Form, self).__init__(*args, **kwargs)
+    for f in self.fields:
+      self.fields[f].widget.attrs['class'] = 'form-control form-control-sm'
+      self.fields['documento'].widget.attrs['readonly'] = 'readonly'

@@ -1,0 +1,98 @@
+{%  load static %}
+<html>
+  <head>
+    <!-- BS5 -->
+    <link rel="stylesheet" href="{% static 'global/css/bootstrap.min.css' %}">
+  </head>
+
+  <nav class="navbar navbar-light bg-light">
+    <div class="container">
+      <a data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+        </svg>
+      </a>
+  </nav>
+
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Menu de opções</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div><a href="#">Solicitações de pesquisa</a></div>
+      <div><a href="#">Solicitações de UGAI</a></div>
+      <div><a href="#">Dashboard</a></div>
+    </div>
+  </div>
+
+  <!-- Sweet alert -->
+  <script src="{% static 'global/js/sweetalert2@11.js' %}"></script>
+  <!-- Alert messages in sweet alert -->
+  {% if messages %}
+    {% for message in messages %}
+      {% if not 'logged_in' in message.tags %}
+        {% if 'alert-success' in message.tags %}
+          <script>
+            Swal.fire({
+            position: "top",
+            title: "Sucesso!",
+            icon: "success",
+            text: "{{ message|escapejs }}",
+            timer: 2500,
+            showConfirmButton: false,
+            draggable: true,
+            backdrop: false
+            });
+          </script>
+        {% elif 'alert-info' in message.tags %}
+          <script>
+            Swal.fire({
+            position: "top",
+            title: "Informação",
+            icon: "info",
+            text: "{{ message|escapejs }}",
+            timer: 2500,
+            showConfirmButton: false,
+            draggable: true,
+            backdrop: false
+            });
+          </script>
+        {% elif 'alert-warning' in message.tags %}
+          <script>
+            Swal.fire({
+            position: "top",
+            title: "Alerta",
+            icon: "warning",
+            text: "{{ message|escapejs }}",
+            timer: 2500,
+            showConfirmButton: false,
+            draggable: true,
+            backdrop: false
+            });
+          </script>
+        {% else %}
+          <script>
+            Swal.fire({
+            position: "top",
+            title: "Error",
+            icon: "error",
+            text: "{{ message|escapejs }}",
+            timer: 2500,
+            showConfirmButton: false,
+            draggable: true,
+            backdrop: false
+            });
+          </script>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  <div class="container">
+    {% block content %}{% endblock content %}
+  </div>
+
+  <!-- BS5 -->
+   <script src="{% static 'global/js/bootstrap.bundle.min.js' %}"></script>
+</html>

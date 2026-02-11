@@ -6,7 +6,7 @@
 
   function render_solic_ugai(elements) {
     const header_pesquisas = document.createElement("h4");
-    header_pesquisas.textContent = "Pesquisas | (Solicitadas/Finalizadas)";
+    header_pesquisas.textContent = "Solicitações UGAI | (Solicitadas/Finalizadas)";
     header_pesquisas.style = "margin-bottom: 20px; margin-top: 15px;";
     header_pesquisas.classList = "pesquisas_title";
     div_pesquisas_solic.appendChild(header_pesquisas);
@@ -30,7 +30,7 @@
       const link = document.createElement("a");
       link.textContent = "Ver detalhes";
       link.href =
-        `${window.location.origin}${target_url}${element.user_solic}/`;
+        `${window.location.origin}${target_url}${element.id}/`;
 
       const partesData = element.data_solicitacao.split("-");
       const data = document.createElement("p");
@@ -49,8 +49,6 @@
   })
   .then(response => response.json())
   .then(data => {
-    console.log(data.objs);
-
     render_solic_ugai(data.objs);
   })
   .catch(error => {
