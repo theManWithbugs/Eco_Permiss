@@ -1,0 +1,19 @@
+#content {
+  margin-top: 30px;
+}
+
+#info_top {
+  position: relative;
+  padding: 5px;
+}
+#info_top::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00a859 0%, #0066cc 50%, #ffd400 100%);
+  pointer-events: none;
+  z-index: 2;
+}

@@ -1,0 +1,32 @@
+{% extends 'core/commons/base.html' %}
+{% load static %}
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'manager/css/card_items.css' %}">
+{% endblock css %}
+
+{% block content %}
+
+  <div class="container w-50">
+    <div class="row align-items-start gap-4">
+        <div class="col p-3 box_home">
+          <a onclick="carregarPagina(1, false)" class="d-flex justify-content-center">
+            <img src="{% static 'manager/img/icone_pesq_aguard_aprov.png' %}" class="img_menu">
+          </a>
+        </div>
+
+        <div class="col p-3 box_home">
+            <a onclick="carregarPagina(1, true)" class="d-flex justify-content-center">
+              <img src="{% static 'manager/img/icone_pesq_concluidas.png' %}" class="img_menu">
+            </a>
+        </div>
+    </div>
+  </div>
+
+  <div id="div_items"></div>
+
+{% endblock content %}
+
+{% block js %}
+  <script src="{% static 'manager/js/listar_pesq.js' %}"></script>
+{% endblock js %}

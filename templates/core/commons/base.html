@@ -3,15 +3,19 @@
   <head>
     <!-- BS5 -->
     <link rel="stylesheet" href="{% static 'global/css/bootstrap.min.css' %}">
+
+    <link rel="stylesheet" href="{% static 'manager/css/main.css' %}">
+    {% block css %}{% endblock css %}
   </head>
 
-  <nav class="navbar navbar-light bg-light">
+  <nav class="navbar navbar-light bg-light" id="info_top">
     <div class="container">
       <a data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
         </svg>
       </a>
+      <img src="{% static 'user/img/img_sema_default.png' %}" width="140px" class="ms-3">
   </nav>
 
   <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
@@ -20,7 +24,7 @@
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-      <div><a href="#">Solicitações de pesquisa</a></div>
+      <div><a href="{% url 'manager:listar_pesq' %}">Solicitações de pesquisa</a></div>
       <div><a href="#">Solicitações de UGAI</a></div>
       <div><a href="#">Dashboard</a></div>
     </div>
@@ -89,10 +93,11 @@
     {% endfor %}
   {% endif %}
 
-  <div class="container">
+  <div class="container" id="content">
     {% block content %}{% endblock content %}
   </div>
 
   <!-- BS5 -->
-   <script src="{% static 'global/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'global/js/bootstrap.bundle.min.js' %}"></script>
+  {% block js %}{% endblock js %}
 </html>
