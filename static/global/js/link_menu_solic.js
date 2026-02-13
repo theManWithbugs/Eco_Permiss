@@ -8,15 +8,10 @@ function mostrar_formulario(value) {
   pesquisa.style.display = 'none';
   ugai.style.display = 'none';
 
-  button_pesq.style.borderColor = 'silver';
-  button_ugai.style.borderColor = 'silver';
-
   if (value === 'solic_pesq') {
     pesquisa.style.display = 'block';
-    button_pesq.style.borderColor = 'blue';
   }else if ( value === 'aut_ugai' ) {
     ugai.style.display = 'block';
-    button_ugai.style.borderColor = 'blue';
   }
 }
 

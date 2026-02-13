@@ -9,8 +9,10 @@ urlpatterns = [
   path('home/', views.home, name='home'),
 
   path('listar_pesq/', views.listar_pesq, name='listar_pesq'),
+  path('listar_ugais/', views.listar_ugais, name='listar_ugais'),
 
   #Endpoints above here
   #---------------------------------------------------------#
   path('api_resp_pesq/', views.resp_list_pesq, name='resp_pesq'),
+  path('api_resp_ugai/', views.resp_list_ugai, name='resp_ugai')
 ]

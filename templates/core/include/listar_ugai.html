@@ -1,0 +1,55 @@
+{% extends 'core/commons/base.html' %}
+{% load static %}
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'global/css/btn_paginator.css' %}">
+  <link rel="stylesheet" href="{% static 'manager/css/card_items.css' %}">
+{% endblock css %}
+
+{% block content %}
+
+  <h4 id="title_page"></h4>
+
+  <div class="container">
+    <div class="row align-items-start gap-4 w-50">
+        <div class="col p-3 box_home" id="pesqInativas">
+          <a onclick="carregarPagina(1, false), currentIcon(1)" class="d-flex justify-content-center">
+            <img src="{% static 'manager/img/icone_pesq_aguard_aprov.png' %}" class="img_menu">
+          </a>
+        </div>
+
+        <div class="col p-3 box_home" id="pesqAtivas">
+          <a onclick="carregarPagina(1, true), currentIcon(2)" class="d-flex justify-content-center">
+            <img src="{% static 'manager/img/icone_pesq_concluidas.png' %}" class="img_menu">
+          </a>
+        </div>
+    </div>
+  </div>
+
+  <div id="div_items"></div>
+
+  <div class="button-container">
+    <button class="button-3d" id="btn-anterior">
+      <div class="button-top">
+        <span class="material-icons">❮</span>
+      </div>
+      <div class="button-bottom"></div>
+      <div class="button-base"></div>
+    </button>
+
+    <span id="info-pagina" class="mt-4">Página X de Y</span>
+
+    <button class="button-3d" id="btn-proximo">
+      <div class="button-top">
+        <span class="material-icons">❯</span>
+      </div>
+      <div class="button-bottom"></div>
+      <div class="button-base"></div>
+    </button>
+  </div>
+
+{% endblock content %}
+
+{% block js %}
+  <script src="{% static 'manager/js/listar_ugais.js' %}"></script>
+{% endblock js %}

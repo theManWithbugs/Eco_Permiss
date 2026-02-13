@@ -16,14 +16,14 @@ function currentIcon(value) {
       pesqAtivas.style.borderColor = 'silver';
       pesqInativas.style.borderColor = 'black';
 
-      div_title.textContent = '(Pesquisas Inativas| Inativas-Finalizadas)';
+      div_title.textContent = '(Solicitações de UGAI| Inativas-Finalizadas)';
       break;
 
     case 2:
       pesqInativas.style.borderColor = 'silver';
       pesqAtivas.style.borderColor = 'black';
 
-      div_title.textContent = '(Pesquisas Ativas| Aguardando aprovação)';
+      div_title.textContent = '(Solicitações de UGAI| Aguardando aprovação)';
       break;
   }
 }
@@ -37,7 +37,7 @@ function render_items(items) {
     card.className = 'card_items';
 
     const titulo = document.createElement('h5');
-    titulo.textContent = item.acao_realizada;
+    titulo.textContent = item.ativ_desenv;
 
     const status = document.createElement('span');
     status.innerHTML = `${item.status}`;
@@ -60,7 +60,7 @@ function render_items(items) {
 
 // Caso não seja recebido o parametro para new status, mantém o status atual
 function carregarPagina(numeroDaPagina, newStatus = currentStatus) {
-  fetch(`/manager/api_resp_pesq/?status=${newStatus}&page=${numeroDaPagina}`, {
+  fetch(`/manager/api_resp_ugai/?status=${newStatus}&page=${numeroDaPagina}`, {
     method: 'GET',
   })
   .then(response => response.json())

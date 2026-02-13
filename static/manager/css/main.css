@@ -1,3 +1,12 @@
+html {
+  /* Deixa o espaço da navbar reservado mesmo que não seja gerada */
+  scrollbar-gutter: stable;
+}
+
+body {
+  padding-right: 0 !important;
+}
+
 #content {
   margin-top: 30px;
 }

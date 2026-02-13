@@ -15,7 +15,9 @@
           <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
         </svg>
       </a>
-      <img src="{% static 'user/img/img_sema_default.png' %}" width="140px" class="ms-3">
+      <a href="{% url 'manager:home' %}" style="text-decoration: none; color: transparent;">
+        <img src="{% static 'user/img/img_sema_default.png' %}" width="140px" class="ms-3">
+      </a>
   </nav>
 
   <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
@@ -25,7 +27,7 @@
     </div>
     <div class="offcanvas-body">
       <div><a href="{% url 'manager:listar_pesq' %}">Solicitações de pesquisa</a></div>
-      <div><a href="#">Solicitações de UGAI</a></div>
+      <div><a href="{% url 'manager:listar_ugais' %}">Solicitações de UGAI</a></div>
       <div><a href="#">Dashboard</a></div>
     </div>
   </div>

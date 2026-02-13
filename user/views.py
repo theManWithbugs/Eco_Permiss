@@ -35,22 +35,6 @@ def dados_pessoais_required(view_func):
 
     return wrapper
 
-# def has_permission_pesq(view_func):
-#     @wraps(view_func)
-#     def wrapper(request, *args, **kwargs):
-
-#         #Id vem por meio de kwargs
-#         pesquisa_id = kwargs.get('id')
-
-#         pesquisa = get_object_or_404(DadosSolicPesquisa, id=pesquisa_id)
-
-#         if pesquisa.user_solic.id != request.user.id:
-#             return redirect('user:info_pesq')
-
-#         return view_func(request, *args, **kwargs)
-
-#     return wrapper
-
 def logoutView(request):
     auth_logout(request)
     return redirect('user:login')
