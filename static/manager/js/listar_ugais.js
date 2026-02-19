@@ -16,14 +16,14 @@ function currentIcon(value) {
       pesqAtivas.style.borderColor = 'silver';
       pesqInativas.style.borderColor = 'black';
 
-      div_title.textContent = '(Solicitações de UGAI| Inativas-Finalizadas)';
+      div_title.textContent = '(Solicitações de UGAI | Inativas-Finalizadas)';
       break;
 
     case 2:
       pesqInativas.style.borderColor = 'silver';
       pesqAtivas.style.borderColor = 'black';
 
-      div_title.textContent = '(Solicitações de UGAI| Aguardando aprovação)';
+      div_title.textContent = '(Solicitações de UGAI | Aguardando aprovação)';
       break;
   }
 }
@@ -39,8 +39,8 @@ function render_items(items) {
     const titulo = document.createElement('h5');
     titulo.textContent = item.ativ_desenv;
 
-    const status = document.createElement('span');
-    status.innerHTML = `${item.status}`;
+    // const status = document.createElement('span');
+    // status.innerHTML = `${item.status}`;
 
     const partesData = item.data_solicitacao.split('-');
     const data = document.createElement('p');
@@ -53,7 +53,7 @@ function render_items(items) {
     link.href =
       `#`;
 
-    card.append(titulo, status, data, link)
+    card.append(titulo, data, link)
     div_items.append(card);
   })
 }

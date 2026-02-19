@@ -5,9 +5,13 @@ from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.forms import model_to_dict
 from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
+
+from django import forms
 
 #Local imports
 from core.models import *
+from core.utils import calcular_data
 
 #from rest framework to use JS fetch
 import json
@@ -50,6 +54,33 @@ def login_as_manager(request):
 
 @login_required
 @has_permiss
+def info_pesquisa(request, id):
+  template_name = 'core/include/info_pesq_adm.html'
+
+  obj = get_object_or_404(DadosSolicPesquisa, id=id)
+  documentos = ArquivosRelFinal.objects.filter(pesquisa=obj)
+  membro_equip = MembroEquipe.objects.filter(pesquisa=obj)
+
+  inicio = obj.inicio_atividade
+  final = obj.final_atividade
+
+  if inicio and final:
+    duracao_pesq = calcular_data(str(inicio), str(final))
+
+  context = {
+    'obj': obj,
+    'documentos': documentos,
+    'duracao_pesq': duracao_pesq,
+    'membro_equip': membro_equip
+  }
+
+  return render(request, template_name, context)
+
+#Only to render
+#------------------------------------------------------------------#
+
+@login_required
+@has_permiss
 def home(request):
   template_name = 'core/commons/home.html'
   return render(request, template_name)
@@ -65,6 +96,35 @@ def listar_pesq(request):
 def listar_ugais(request):
   template_name = 'core/include/listar_ugai.html'
   return render(request, template_name)
+
+#Only action
+#------------------------------------------------------------------#
+@login_required
+@has_permiss
+def excluir_arq(request, id):
+  pesquisa = get_object_or_404(DadosSolicPesquisa, id=id)
+  if request.method == 'POST':
+    documento_id = request.POST.get('documento_id')
+
+    if documento_id:
+        try:
+            arquivo = ArquivosRelFinal.objects.get(id=documento_id)
+            if pesquisa:
+
+                documentos_associados = ArquivosRelFinal.objects.filter(id=documento_id)
+                for doc in documentos_associados:
+                    doc.delete_documento()
+
+            arquivo.delete_documento()
+
+            messages.success(request, 'Arquivo Excluido com sucesso!')
+        except ArquivosRelFinal.DoesNotExist:
+            messages.error(request, 'Documento não encontrado!')
+
+  return redirect('manager:info_pesquisa', id)
+
+#------------------------------------------------------------------#
+
 
 #API endpoints
 #------------------------------------------------------------------#
@@ -152,8 +212,4 @@ def resp_list_ugai(request):
     'totalPages': paginator.num_pages,
     'hasNext': page_obj.has_next(),
     'hasPrevious': page_obj.has_previous()
-  })
-
-  return JsonResponse({
-    'message': 'isso vem do backend(Ugais)'
   })

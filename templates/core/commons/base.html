@@ -4,31 +4,62 @@
     <!-- BS5 -->
     <link rel="stylesheet" href="{% static 'global/css/bootstrap.min.css' %}">
 
+    <!-- Main CSS -->
     <link rel="stylesheet" href="{% static 'manager/css/main.css' %}">
+
+    <!-- Local Button -->
+    <link rel="stylesheet" href="{% static 'manager/css/button_offcanvas.css' %}">
     {% block css %}{% endblock css %}
   </head>
 
-  <nav class="navbar navbar-light bg-light" id="info_top">
-    <div class="container">
-      <a data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+  <nav class="navbar" id="info_top">
+    <div class="container mt-1">
+      <a data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample" style="text-decoration: none; color: white;">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
         </svg>
       </a>
-      <a href="{% url 'manager:home' %}" style="text-decoration: none; color: transparent;">
-        <img src="{% static 'user/img/img_sema_default.png' %}" width="140px" class="ms-3">
+      <a href="{% url 'manager:home' %}" style="text-decoration: none; color: transparent;" class="mb-1">
+        <img src="{% static 'user/img/img_sema_default.png' %}" width="140px" class="ms-3 bg-white p-1 rounded">
       </a>
   </nav>
 
   <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Menu de opções</h5>
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">MENU DE OPÇÕES</h5>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-      <div><a href="{% url 'manager:listar_pesq' %}">Solicitações de pesquisa</a></div>
-      <div><a href="{% url 'manager:listar_ugais' %}">Solicitações de UGAI</a></div>
-      <div><a href="#">Dashboard</a></div>
+      <div class="item_menu">
+        <a href="{% url 'manager:listar_pesq' %}">
+          <button class="learn-more">
+            <span class="circle" aria-hidden="true">
+            <span class="icon arrow"></span>
+            </span>
+            <span class="button-text">pesquisas solicitadas</span>
+          </button>
+        </a>
+      </div>
+      <div class="item_menu">
+        <a href="{% url 'manager:listar_ugais' %}">
+          <button class="learn-more">
+            <span class="circle" aria-hidden="true">
+            <span class="icon arrow"></span>
+            </span>
+            <span class="button-text">ugais solicitadas</span>
+          </button>
+        </a>
+      </div>
+      <div class="item_menu">
+        <a href="#">
+          <button class="learn-more">
+            <span class="circle" aria-hidden="true">
+            <span class="icon arrow"></span>
+            </span>
+            <span class="button-text">dashboard</span>
+          </button>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -95,7 +126,7 @@
     {% endfor %}
   {% endif %}
 
-  <div class="container" id="content">
+  <div class="container bg-light rounded" id="content">
     {% block content %}{% endblock content %}
   </div>
 

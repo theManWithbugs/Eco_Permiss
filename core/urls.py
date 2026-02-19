@@ -11,6 +11,13 @@ urlpatterns = [
   path('listar_pesq/', views.listar_pesq, name='listar_pesq'),
   path('listar_ugais/', views.listar_ugais, name='listar_ugais'),
 
+  path('info_pesq/<str:id>/', views.info_pesquisa, name='info_pesquisa'),
+
+  #Only action
+  #---------------------------------------------------------#
+  path('excluir_arq/<str:id>/', views.excluir_arq, name='excluir_arq'),
+  #---------------------------------------------------------#
+
   #Endpoints above here
   #---------------------------------------------------------#
   path('api_resp_pesq/', views.resp_list_pesq, name='resp_pesq'),

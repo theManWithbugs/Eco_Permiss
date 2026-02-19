@@ -9,20 +9,30 @@ body {
 
 #content {
   margin-top: 30px;
+  position: relative;
+  z-index: 1;
 }
 
 #info_top {
+  background-color: #0059B2;
   position: relative;
   padding: 5px;
 }
+
 #info_top::before{
   content: "";
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #00a859 0%, #0066cc 50%, #ffd400 100%);
+  background: linear-gradient(90deg, #009739 0%, #009739 15%, #2d89ef 45%, #ffcc00 75%, #f2c300 100%);
   pointer-events: none;
   z-index: 2;
+}
+
+.item_menu {
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: black;
 }

@@ -1,6 +1,8 @@
 let currentStatus;
 let paginaAtual = 1;
 
+const url_atual = '/manager/info_pesq/';
+
 const div_items = document.getElementById('div_items');
 const btnAnterior = document.getElementById('btn-anterior');
 const btnProximo = document.getElementById('btn-proximo');
@@ -16,14 +18,14 @@ function currentIcon(value) {
       pesqAtivas.style.borderColor = 'silver';
       pesqInativas.style.borderColor = 'black';
 
-      div_title.textContent = '(Pesquisas Inativas| Inativas-Finalizadas)';
+      div_title.textContent = '(Pesquisas | Inativas-Finalizadas)';
       break;
 
     case 2:
       pesqInativas.style.borderColor = 'silver';
       pesqAtivas.style.borderColor = 'black';
 
-      div_title.textContent = '(Pesquisas Ativas| Aguardando aprovação)';
+      div_title.textContent = '(Pesquisas | Ativas-Aguardando)';
       break;
   }
 }
@@ -39,8 +41,8 @@ function render_items(items) {
     const titulo = document.createElement('h5');
     titulo.textContent = item.acao_realizada;
 
-    const status = document.createElement('span');
-    status.innerHTML = `${item.status}`;
+    // const status = document.createElement('span');
+    // status.innerHTML = `${item.status}`;
 
     const partesData = item.data_solicitacao.split('-');
     const data = document.createElement('p');
@@ -51,9 +53,9 @@ function render_items(items) {
     const link = document.createElement('a');
     link.textContent = 'Ver detalhes';
     link.href =
-      `#`;
+      `${window.location.origin}${url_atual}${item.id}/`;
 
-    card.append(titulo, status, data, link)
+    card.append(titulo, data, link)
     div_items.append(card);
   })
 }
