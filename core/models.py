@@ -1,6 +1,7 @@
 from .choices import *
 from .utils import check_number, validador_cpf
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 import os
 
 from django.db import models
@@ -85,7 +86,7 @@ class DadosSolicPesquisa(models.Model):
                             null=False, verbose_name='Fotografia e imagens da UC?', max_length=3)
 
     licenca_inst = models.CharField(
-        choices=YES_OR_NOT, blank=False, null=False, verbose_name='Licença de instituição responsavel?', max_length=3)
+        blank=False, null=False, verbose_name='É necessario licença de instituição responsavel?/(especifique)', max_length=30)
 
     inicio_atividade = models.DateField(default=timezone.localdate)
     final_atividade = models.DateField(default=timezone.localdate)
@@ -95,6 +96,9 @@ class DadosSolicPesquisa(models.Model):
 
     area_atuacao = models.CharField(
         choices=CHOICES_AREA_ATUACAO, blank=False, null=False, verbose_name='Aréa de atuação', max_length=100)
+
+    gestor_resp =  models.CharField(
+        default='NA', max_length=80, verbose_name='Gestor responsavel:')
 
     status = models.BooleanField(default=False)
 
@@ -147,30 +151,99 @@ class ArquivosRelFinal(models.Model):
     def __str__(self):
         return f"{self.pesquisa.acao_realizada}"
 
+class Ugai(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nome = models.CharField(max_length=80)
+    total_vagas = models.PositiveIntegerField()
+
+    def __str__(self):
+        return self.nome
+
+    class Meta:
+        db_table = "ugai"
+
+    #"lte less than or equal", menor ou igual a data que foi solicitada
+    #"gte greater than or equal": maior ou igual a data que foi solicitada
+    def vagas_ocupadas(self, inicio, fim):
+        return self.solicitacoes.filter(
+            status=True,
+            data_inicio__lte=fim,
+            data_final__gte=inicio
+        ).count()
+
+    def vagas_disponiveis(self, inicio, fim):
+        return self.total_vagas - self.vagas_ocupadas(inicio, fim)
+
 class SolicitacaoUgais(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False)
-    user_solic = models.ForeignKey(User, on_delete=models.CASCADE)
-    ugai = models.CharField(choices=CHOICES_UGAIS, max_length=16, verbose_name='Qual ugai?')
-    instituicao = models.CharField(max_length=40, blank=True, null=True, verbose_name='Instituição', default='NA')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    user_solic = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    ugai = models.ForeignKey(
+        Ugai,
+        on_delete=models.PROTECT,
+        related_name="solicitacoes"
+    )
+
+    instituicao = models.CharField(max_length=40, blank=True, null=True, default='NA')
     setor = models.CharField(max_length=40, blank=True, null=True, default='NA')
     cargo = models.CharField(max_length=40, blank=True, null=True, default='NA')
-    ativ_desenv = models.CharField(max_length=80, blank=False, null=False, verbose_name='Atividades que irá desenvolver')
-    publico_alvo = models.CharField(max_length=80, blank=False, null=False, verbose_name='Público alvo')
+
+    ativ_desenv = models.CharField(max_length=80)
+    publico_alvo = models.CharField(max_length=80)
+
     status = models.BooleanField(default=False)
+
     data_solicitacao = models.DateField(default=timezone.localdate)
     data_inicio = models.DateField(default=timezone.localdate)
     data_final = models.DateField(default=timezone.localdate)
 
     def __str__(self):
-        return f"{self.ugai}"
-
-    def save(self, *args, **kwargs):
-        for field in self._meta.fields:
-            value = getattr(self, field.name)
-            if isinstance(field, models.CharField) and value is not None:
-                setattr(self, field.name, value.upper())
-        super().save(*args, **kwargs)
+        return f"{self.ugai.nome} - {self.user_solic}"
 
     class Meta:
         db_table = "solic_ugai"
+        indexes = [
+            models.Index(fields=["ugai", "data_inicio", "data_final"]),
+        ]
+
+    def clean(self):
+        if self.data_inicio > self.data_final:
+            raise ValidationError("Data final não pode ser menor que data inicial.")
+
+        if self.status:
+            vagas = self.ugai.vagas_disponiveis(self.data_inicio, self.data_final)
+            if vagas <= 0:
+                raise ValidationError("Não há vagas disponiveis para esse período.")
+
+
+# class SolicitacaoUgais(models.Model):
+#     id = models.UUIDField(
+#         primary_key=True, default=uuid.uuid4, editable=False)
+#     user_solic = models.ForeignKey(User, on_delete=models.CASCADE)
+#     ugai = models.CharField(choices=CHOICES_UGAIS, max_length=16, verbose_name='Qual ugai?')
+#     instituicao = models.CharField(max_length=40, blank=True, null=True, verbose_name='Instituição', default='NA')
+#     setor = models.CharField(max_length=40, blank=True, null=True, default='NA')
+#     cargo = models.CharField(max_length=40, blank=True, null=True, default='NA')
+#     ativ_desenv = models.CharField(max_length=80, blank=False, null=False, verbose_name='Atividades que irá desenvolver')
+#     publico_alvo = models.CharField(max_length=80, blank=False, null=False, verbose_name='Público alvo')
+#     status = models.BooleanField(default=False)
+#     data_solicitacao = models.DateField(default=timezone.localdate)
+#     data_inicio = models.DateField(default=timezone.localdate)
+#     data_final = models.DateField(default=timezone.localdate)
+
+#     def __str__(self):
+#         return f"{self.ugai}"
+
+#     def save(self, *args, **kwargs):
+#         for field in self._meta.fields:
+#             value = getattr(self, field.name)
+#             if isinstance(field, models.CharField) and value is not None:
+#                 setattr(self, field.name, value.upper())
+#         super().save(*args, **kwargs)
+
+#     class Meta:
+#         db_table = "solic_ugai"

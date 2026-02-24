@@ -6,6 +6,7 @@ from functools import wraps
 from django.forms import model_to_dict
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 
 from django import forms
 
@@ -76,6 +77,19 @@ def info_pesquisa(request, id):
 
   return render(request, template_name, context)
 
+@login_required
+@has_permiss
+def info_ugai(request, id):
+  template_name = 'core/include/info_ugai.html'
+
+  obj = get_object_or_404(SolicitacaoUgais, id=id)
+
+  context = {
+    'obj': obj
+  }
+
+  return render(request, template_name, context)
+
 #Only to render
 #------------------------------------------------------------------#
 
@@ -95,6 +109,12 @@ def listar_pesq(request):
 @has_permiss
 def listar_ugais(request):
   template_name = 'core/include/listar_ugai.html'
+  return render(request, template_name)
+
+@login_required
+@has_permiss
+def dashboard(request):
+  template_name = 'core/include/dashboard.html'
   return render(request, template_name)
 
 #Only action
@@ -122,7 +142,6 @@ def excluir_arq(request, id):
             messages.error(request, 'Documento não encontrado!')
 
   return redirect('manager:info_pesquisa', id)
-
 #------------------------------------------------------------------#
 
 
@@ -213,3 +232,75 @@ def resp_list_ugai(request):
     'hasNext': page_obj.has_next(),
     'hasPrevious': page_obj.has_previous()
   })
+
+def aprovar_pesq(request):
+  if not request.user.is_authenticated:
+    return JsonResponse(
+      {'error': 'Usuario não autenticado'},
+      status=401
+    )
+
+  if not request.user.is_staff:
+    return JsonResponse(
+      {'error': 'Usuario não autorizado!'},
+      status=401
+    )
+
+  if request.method == 'POST':
+    data = json.loads(request.body)
+
+    obj = get_object_or_404(DadosSolicPesquisa, id=data['id'])
+
+    gestor_resp = f"{request.user.first_name} {request.user.last_name}"
+
+    if obj.status == False:
+      try:
+        obj.status = True
+        obj.gestor_resp = gestor_resp
+        obj.save()
+
+        return JsonResponse({'status': 'ok', 'message': f'Aprovação realizada com sucesso!'}, status=200)
+
+      except DadosSolicPesquisa.DoesNotExist:
+        return JsonResponse({'status': 'error(404)', 'message': 'Pesquisa não encontrada!'}, status=404)
+
+      except Exception as e:
+        return JsonResponse({'status': 'error(400)', 'message':  f'Ocorreu um erro: {e}'}, status=400)
+    else:
+      JsonResponse({'status': 'error(403)', 'message': 'Operação não permitida'}, status=403)
+
+  else:
+    return JsonResponse({'status': 'error(405)', 'message': 'Método não permitido!'}, status=405)
+
+@login_required
+def solicitar_ugai(request):
+
+    #select_for_update() realiza um bloqueio de linha e diz para o servidor:
+    #vou ler este registro agora e pretendo atualizá-lo em breve, bloqueie-o
+    #para que ninguém mais mexa nele até eu terminar o que preciso
+
+    if request.method == 'POST':
+      data = json.loads(request.body)
+
+      pk = data['id']
+
+      with transaction.atomic():
+
+          solicitacao = SolicitacaoUgais.objects.select_for_update().get(
+              id=pk
+          )
+
+          ugai = Ugai.objects.select_for_update().get(id=solicitacao.ugai.id)
+
+          vagas = ugai.vagas_disponiveis(
+              solicitacao.data_inicio,
+              solicitacao.data_final
+          )
+
+          if solicitacao.quantidade_pessoas > vagas:
+              raise ValidationError(
+                  f"Sem vagas suficientes. Restam apenas {vagas}"
+              )
+
+          solicitacao.status = True
+          solicitacao.save()

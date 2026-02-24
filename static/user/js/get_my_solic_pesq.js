@@ -25,7 +25,7 @@
       } else {
         status.textContent = "INATIVO/FINALIZADO";
         status.style = "color: red;";
-      }
+    }
 
       const link = document.createElement("a");
       link.textContent = "Ver detalhes";

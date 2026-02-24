@@ -181,8 +181,9 @@ def realizar_solic(request):
 
             if form_ugai.is_valid():
                 obj = form_ugai.save(commit=False)
-                id_ugai = obj.id
+                # id_ugai = obj.id
                 obj.user_solic = user
+                obj.status = False
                 try:
                     obj.save()
                     messages.success(request, 'Solicitação efetuada com sucesso!')
@@ -322,6 +323,8 @@ def minhas_solic_pesq(request):
 def minhas_solic_ugai(request):
     template_name = 'user/include/minhas_solic_ugai.html'
     return render(request, template_name)
+
+#API Views
 
 def api_minhas_solic(request):
     if not request.user.is_authenticated:

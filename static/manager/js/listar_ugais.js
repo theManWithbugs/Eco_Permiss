@@ -1,6 +1,8 @@
 let currentStatus;
 let paginaAtual = 1;
 
+const url_atual = '/manager/info_ugai/';
+
 const div_items = document.getElementById('div_items');
 const btnAnterior = document.getElementById('btn-anterior');
 const btnProximo = document.getElementById('btn-proximo');
@@ -51,7 +53,7 @@ function render_items(items) {
     const link = document.createElement('a');
     link.textContent = 'Ver detalhes';
     link.href =
-      `#`;
+      `${window.location.origin}${url_atual}${item.id}/`;
 
     card.append(titulo, data, link)
     div_items.append(card);
