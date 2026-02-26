@@ -181,9 +181,8 @@ def realizar_solic(request):
 
             if form_ugai.is_valid():
                 obj = form_ugai.save(commit=False)
-                # id_ugai = obj.id
                 obj.user_solic = user
-                obj.status = False
+                obj.status = 'PENDENTE'
                 try:
                     obj.save()
                     messages.success(request, 'Solicitação efetuada com sucesso!')
@@ -297,6 +296,7 @@ def excluir_arq(request, id):
 def info_ugai(request, id):
     template_name = 'user/include/info_ugai.html'
 
+    #Tem que mudar isso!
     try:
         UUID(str(id))
     except (ValueError, TypeError):

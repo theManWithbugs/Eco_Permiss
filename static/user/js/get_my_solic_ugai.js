@@ -19,14 +19,11 @@
       titulo.textContent = element["ativ_desenv"];
 
       const status = document.createElement("p");
-      if (element["status"]) {
-        status.textContent = "EM-ANDAMENTO/AGUARDANDO-APROVAÇÃO";
-        status.style = "color: blue;";
-      } else {
-        status.textContent = "INATIVO/FINALIZADO";
-        status.style = "color: red;";
-      }
-
+      status.innerText = `${element['status']}`;
+      if (element['status'] == 'APROVADO') {status.style.color = '#4caf50';
+      } else if (element['status'] == 'PENDENTE') {status.style.color = '#919191d0';
+      } else if (element['status'] == 'INVALIDADO') {status.style.color = '#f44336';
+      } else if (element['status'] == 'ENCERRADO') {status.style.color = '#007706d0';}
       const link = document.createElement("a");
       link.textContent = "Ver detalhes";
       link.href =

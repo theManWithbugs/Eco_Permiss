@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
@@ -6,9 +8,9 @@ from functools import wraps
 from django.forms import model_to_dict
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
-from django.db import transaction
+from uuid import UUID
 
-from django import forms
+from django.db import transaction
 
 #Local imports
 from core.models import *
@@ -83,9 +85,17 @@ def info_ugai(request, id):
   template_name = 'core/include/info_ugai.html'
 
   obj = get_object_or_404(SolicitacaoUgais, id=id)
+  current_ugai = get_object_or_404(Ugai, id=obj.ugai.id)
+
+  data_inicio = obj.data_inicio
+  data_final = obj.data_final
+
+  vagas = current_ugai.vagas_disponiveis(data_inicio, data_final)
 
   context = {
-    'obj': obj
+    'obj': obj,
+    'vagas': vagas,
+    'current_ugai': current_ugai
   }
 
   return render(request, template_name, context)
@@ -204,12 +214,14 @@ def resp_list_ugai(request):
     )
 
   status = request.GET.get('status')
-  if status.lower() == "true":
-    status = True
-  elif status.lower() == "false":
-    status = False
-  else:
-    return JsonResponse({'error': 'Status inválido'}, status=400)
+  print(f'O status é: {status}')
+  #ONLY TRASH
+  # if status.lower() == "true":
+  #   status = True
+  # elif status.lower() == "false":
+  #   status = False
+  # else:
+  #   return JsonResponse({'error': 'Status inválido'}, status=400)
 
   dados = SolicitacaoUgais.objects.filter(status=status).order_by('-data_solicitacao')
 
@@ -259,7 +271,7 @@ def aprovar_pesq(request):
         obj.gestor_resp = gestor_resp
         obj.save()
 
-        return JsonResponse({'status': 'ok', 'message': f'Aprovação realizada com sucesso!'}, status=200)
+        return JsonResponse({'status': 'ok', 'message': 'Aprovação realizada com sucesso!'}, status=200)
 
       except DadosSolicPesquisa.DoesNotExist:
         return JsonResponse({'status': 'error(404)', 'message': 'Pesquisa não encontrada!'}, status=404)
@@ -268,39 +280,92 @@ def aprovar_pesq(request):
         return JsonResponse({'status': 'error(400)', 'message':  f'Ocorreu um erro: {e}'}, status=400)
     else:
       JsonResponse({'status': 'error(403)', 'message': 'Operação não permitida'}, status=403)
-
   else:
     return JsonResponse({'status': 'error(405)', 'message': 'Método não permitido!'}, status=405)
 
-@login_required
-def solicitar_ugai(request):
 
-    #select_for_update() realiza um bloqueio de linha e diz para o servidor:
-    #vou ler este registro agora e pretendo atualizá-lo em breve, bloqueie-o
-    #para que ninguém mais mexa nele até eu terminar o que preciso
+def aprovar_ugai(request):
 
-    if request.method == 'POST':
-      data = json.loads(request.body)
+    # Autenticação
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {'error': 'Usuario não autenticado'},
+            status=401
+        )
+    if not request.user.is_staff:
+        return JsonResponse(
+            {'error': 'Usuario não autorizado!'},
+            status=401
+        )
+    if request.method != 'POST':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Método não permitido'},
+            status=405
+        )
 
-      pk = data['id']
+    # JSON
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse(
+            {'status': 'error', 'message': 'JSON inválido'},
+            status=400
+        )
 
-      with transaction.atomic():
+    pk = data.get('id')
 
-          solicitacao = SolicitacaoUgais.objects.select_for_update().get(
-              id=pk
-          )
+    if not pk:
+        return JsonResponse(
+            {'status': 'error', 'message': 'ID ausente'},
+            status=400
+        )
 
-          ugai = Ugai.objects.select_for_update().get(id=solicitacao.ugai.id)
+    try:
+        pk = UUID(pk)
+    except ValueError:
+        return JsonResponse(
+            {'status': 'error', 'message': 'UUID inválido'},
+            status=400
+        )
 
-          vagas = ugai.vagas_disponiveis(
-              solicitacao.data_inicio,
-              solicitacao.data_final
-          )
+    try:
+        with transaction.atomic():
 
-          if solicitacao.quantidade_pessoas > vagas:
-              raise ValidationError(
-                  f"Sem vagas suficientes. Restam apenas {vagas}"
-              )
+            solicitacao = SolicitacaoUgais.objects.select_for_update().get(id=pk)
 
-          solicitacao.status = True
-          solicitacao.save()
+            ugai = solicitacao.ugai
+
+            vagas = ugai.vagas_disponiveis(
+                solicitacao.data_inicio,
+                solicitacao.data_final
+            )
+
+            if solicitacao.quantidade_pessoas > vagas:
+                return JsonResponse({
+                    'status': 'error(400)',
+                    'message': f"Restam apenas {vagas} vagas"
+                }, status=400)
+
+            solicitacao.clean()
+            solicitacao.status = 'APROVADO'
+            solicitacao.save()
+
+            # solicitacao.status = True
+            # solicitacao.save()
+
+            return JsonResponse({
+                'status': 'ok',
+                'message': 'Aprovação realizada com sucesso'
+            })
+
+    except SolicitacaoUgais.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Solicitação não encontrada'
+        }, status=404)
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)

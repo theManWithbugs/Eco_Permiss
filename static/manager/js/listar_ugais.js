@@ -13,19 +13,31 @@ const pesqAtivas = document.getElementById('pesqAtivas');
 
 const div_title = document.getElementById('title_page');
 function currentIcon(value) {
+  // Limpa o destaque de todos
+  const cards = [
+    document.getElementById('pesqInativas'),
+    document.querySelectorAll('#pesqAtivas')[0],
+    document.querySelectorAll('#pesqAtivas')[1],
+    document.querySelectorAll('#pesqAtivas')[2]
+  ];
+  cards.forEach(card => card.style.borderColor = 'silver');
+
   switch (value) {
     case 1:
-      pesqAtivas.style.borderColor = 'silver';
-      pesqInativas.style.borderColor = 'black';
-
-      div_title.textContent = '(Solicitações de UGAI | Inativas-Finalizadas)';
+      cards[0].style.borderColor = 'black';
+      div_title.textContent = '(Solicitações de UGAI | PENDENTES)';
       break;
-
     case 2:
-      pesqInativas.style.borderColor = 'silver';
-      pesqAtivas.style.borderColor = 'black';
-
-      div_title.textContent = '(Solicitações de UGAI | Aguardando aprovação)';
+      cards[1].style.borderColor = 'black';
+      div_title.textContent = '(Solicitações de UGAI | APROVADAS)';
+      break;
+    case 3:
+      cards[2].style.borderColor = 'black';
+      div_title.textContent = '(Solicitações de UGAI | INVALIDADAS)';
+      break;
+    case 4:
+      cards[3].style.borderColor = 'black';
+      div_title.textContent = '(Solicitações de UGAI | ENCERRADAS)';
       break;
   }
 }
@@ -61,7 +73,7 @@ function render_items(items) {
 }
 
 // Caso não seja recebido o parametro para new status, mantém o status atual
-function carregarPagina(numeroDaPagina, newStatus = currentStatus) {
+function carregarPagina(numeroDaPagina, newStatus) {
   fetch(`/manager/api_resp_ugai/?status=${newStatus}&page=${numeroDaPagina}`, {
     method: 'GET',
   })
@@ -69,6 +81,7 @@ function carregarPagina(numeroDaPagina, newStatus = currentStatus) {
   .then(data => {
     console.log('API Response:', data);
     render_items(data.objs);
+    console.log(data.objs);
     currentStatus = newStatus;
 
     paginaAtual = data.currentPage;
@@ -91,5 +104,5 @@ btnProximo.addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   currentIcon(1);
-  carregarPagina(paginaAtual, false);
+  carregarPagina(paginaAtual, 'PENDENTE');
 });

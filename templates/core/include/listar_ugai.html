@@ -13,14 +13,26 @@
   <div class="container">
     <div class="row align-items-start gap-4 w-50">
         <div class="col p-3 box_home" id="pesqInativas">
-          <a onclick="carregarPagina(1, false), currentIcon(1)" class="d-flex justify-content-center">
-            <img src="{% static 'manager/img/icone_pesq_aguard_aprov.png' %}" class="img_menu">
+          <a onclick="carregarPagina(1, 'PENDENTE'), currentIcon(1)" class="d-flex justify-content-center">
+            <img src="{% static 'global/img/icone_pendente.png' %}" class="img_menu">
           </a>
         </div>
 
         <div class="col p-3 box_home" id="pesqAtivas">
-          <a onclick="carregarPagina(1, true), currentIcon(2)" class="d-flex justify-content-center">
-            <img src="{% static 'manager/img/icone_pesq_concluidas.png' %}" class="img_menu">
+          <a onclick="carregarPagina(1, 'APROVADO'), currentIcon(2)" class="d-flex justify-content-center">
+            <img src="{% static 'global/img/icone_aprovado.png' %}" class="img_menu">
+          </a>
+        </div>
+
+        <div class="col p-3 box_home" id="pesqAtivas">
+          <a onclick="carregarPagina(1, 'INVALIDADO'), currentIcon(3)" class="d-flex justify-content-center">
+            <img src="{% static 'global/img/icone_invalidado.png' %}" class="img_menu">
+          </a>
+        </div>
+
+        <div class="col p-3 box_home" id="pesqAtivas">
+          <a onclick="carregarPagina(1, 'ENCERRADO'), currentIcon(4)" class="d-flex justify-content-center">
+            <img src="{% static 'global/img/icone_finalizado.png' %}" class="img_menu">
           </a>
         </div>
     </div>

@@ -6,11 +6,6 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12) !important;
-} */
-
 .subtitle {
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -153,9 +148,14 @@ body {
 .badge-ativo {
   background-color: #4caf50 !important;
 }
-
+.badge-pendente {
+  background-color: #919191d0 !important;
+}
 .badge-inativo {
   background-color: #f44336 !important;
+}
+.badge-finalizado {
+  background-color: #007706d0 !important;
 }
 
 /* Footer */

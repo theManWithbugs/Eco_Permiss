@@ -58,7 +58,7 @@ class Solic_Ugai(forms.ModelForm):
   class Meta:
     model = SolicitacaoUgais
     fields = '__all__'
-    exclude = ['user_solic', 'data_solicitacao']
+    exclude = ['user_solic', 'data_solicitacao', 'status']
     widgets = {
       'ativ_desenv': forms.Textarea(attrs={
         'class': 'form-control',

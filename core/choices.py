@@ -95,3 +95,10 @@ CHOICES_UGAIS = [
   ('UGAI ANTIMARY', 'UGAI Antimary'),
   ('UGAI CHANDLESS', 'UGAI Chandles')
 ]
+
+CHOICES_STATUS = [
+  ('APROVADO', 'Aprovado'),
+  ('PENDENTE', 'Pendente'),
+  ('INVALIDADO', 'Invalidado'),
+  ('ENCERRADO', 'Encerrado')
+]
