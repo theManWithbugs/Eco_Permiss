@@ -20,6 +20,67 @@ from core.utils import calcular_data
 import json
 from django.http import JsonResponse
 
+# =========================
+# SUCCESS
+# =========================
+def response_200(message='Operação realizada com sucesso', data=None):
+    return JsonResponse({
+        'message': message,
+        'data': data
+    }, status=200)
+
+def response_201(message='Recurso criado com sucesso', data=None):
+    return JsonResponse({
+        'message': message,
+        'data': data
+    }, status=201)
+
+def response_204():
+    return JsonResponse({}, status=204)
+
+# =========================
+# CLIENT ERRORS
+# =========================
+
+def response_400(message='Solicitação inválida'):
+    return JsonResponse({'message': message}, status=400)
+
+
+def response_401(message='Usuário não autorizado'):
+    return JsonResponse({'message': message}, status=401)
+
+
+def response_403(message='Acesso proibido'):
+    return JsonResponse({'message': message}, status=403)
+
+
+def response_404(message='Recurso não encontrado'):
+    return JsonResponse({'message': message}, status=404)
+
+
+def response_405(message='Método não permitido'):
+    return JsonResponse({'message': message}, status=405)
+
+
+def response_409(message='Conflito na requisição'):
+    return JsonResponse({'message': message}, status=409)
+
+
+def response_422(message='Erro de validação'):
+    return JsonResponse({'message': message}, status=422)
+
+
+# =========================
+# SERVER ERRORS
+# =========================
+
+def response_500(message='Erro interno do servidor'):
+    return JsonResponse({'message': message}, status=500)
+
+
+def response_503(message='Serviço temporariamente indisponível'):
+    return JsonResponse({'message': message}, status=503)
+
 def has_permiss(view_func):
   @wraps(view_func)
   def wrapper(request, *args, **kwargs):
@@ -214,14 +275,6 @@ def resp_list_ugai(request):
     )
 
   status = request.GET.get('status')
-  print(f'O status é: {status}')
-  #ONLY TRASH
-  # if status.lower() == "true":
-  #   status = True
-  # elif status.lower() == "false":
-  #   status = False
-  # else:
-  #   return JsonResponse({'error': 'Status inválido'}, status=400)
 
   dados = SolicitacaoUgais.objects.filter(status=status).order_by('-data_solicitacao')
 
@@ -286,47 +339,29 @@ def aprovar_pesq(request):
 
 def aprovar_ugai(request):
 
-    # Autenticação
     if not request.user.is_authenticated:
-        return JsonResponse(
-            {'error': 'Usuario não autenticado'},
-            status=401
-        )
-    if not request.user.is_staff:
-        return JsonResponse(
-            {'error': 'Usuario não autorizado!'},
-            status=401
-        )
-    if request.method != 'POST':
-        return JsonResponse(
-            {'status': 'error', 'message': 'Método não permitido'},
-            status=405
-        )
+        return response_401()
 
-    # JSON
+    if not request.user.is_staff:
+        return response_403()
+
+    if request.method != 'POST':
+        return response_405()
+
     try:
         data = json.loads(request.body)
     except Exception:
-        return JsonResponse(
-            {'status': 'error', 'message': 'JSON inválido'},
-            status=400
-        )
+        return response_400('JSON inválido')
 
     pk = data.get('id')
 
     if not pk:
-        return JsonResponse(
-            {'status': 'error', 'message': 'ID ausente'},
-            status=400
-        )
+        return response_400('ID ausente')
 
     try:
         pk = UUID(pk)
     except ValueError:
-        return JsonResponse(
-            {'status': 'error', 'message': 'UUID inválido'},
-            status=400
-        )
+        return response_400('UUID inválido')
 
     try:
         with transaction.atomic():
@@ -341,31 +376,16 @@ def aprovar_ugai(request):
             )
 
             if solicitacao.quantidade_pessoas > vagas:
-                return JsonResponse({
-                    'status': 'error(400)',
-                    'message': f"Restam apenas {vagas} vagas"
-                }, status=400)
+                return response_400(f"Restam apenas {vagas} vagas")
 
             solicitacao.clean()
             solicitacao.status = 'APROVADO'
             solicitacao.save()
 
-            # solicitacao.status = True
-            # solicitacao.save()
-
-            return JsonResponse({
-                'status': 'ok',
-                'message': 'Aprovação realizada com sucesso'
-            })
+            return response_200('UGAI aprovada com sucesso')
 
     except SolicitacaoUgais.DoesNotExist:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Solicitação não encontrada'
-        }, status=404)
+        return response_404('Solicitação não encontrada')
 
     except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=500)
+        return response_500(str(e))

@@ -53,9 +53,6 @@ function render_items(items) {
     const titulo = document.createElement('h5');
     titulo.textContent = item.ativ_desenv;
 
-    // const status = document.createElement('span');
-    // status.innerHTML = `${item.status}`;
-
     const partesData = item.data_solicitacao.split('-');
     const data = document.createElement('p');
 

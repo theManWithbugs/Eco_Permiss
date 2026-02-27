@@ -99,6 +99,6 @@ CHOICES_UGAIS = [
 CHOICES_STATUS = [
   ('APROVADO', 'Aprovado'),
   ('PENDENTE', 'Pendente'),
-  ('INVALIDADO', 'Invalidado'),
+  ('INDEFERIDO', 'Indeferido'),
   ('ENCERRADO', 'Encerrado')
 ]
