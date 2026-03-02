@@ -13,19 +13,46 @@ const pesqAtivas = document.getElementById('pesqAtivas');
 
 const div_title = document.getElementById('title_page');
 function currentIcon(value) {
+  // switch (value) {
+  //   case 1:
+  //     pesqAtivas.style.borderColor = 'silver';
+  //     pesqInativas.style.borderColor = 'black';
+
+  //     div_title.textContent = '(Pesquisas | Inativas-Finalizadas)';
+  //     break;
+
+  //   case 2:
+  //     pesqInativas.style.borderColor = 'silver';
+  //     pesqAtivas.style.borderColor = 'black';
+
+  //     div_title.textContent = '(Pesquisas | Ativas-Aguardando)';
+  //     break;
+  // }
+
+  const cards = [
+    document.getElementById('pesqInativas'),
+    document.querySelectorAll('#pesqAtivas')[0],
+    document.querySelectorAll('#pesqAtivas')[1],
+    document.querySelectorAll('#pesqAtivas')[2]
+  ];
+  cards.forEach(card => card.style.borderColor = 'silver');
+
   switch (value) {
     case 1:
-      pesqAtivas.style.borderColor = 'silver';
-      pesqInativas.style.borderColor = 'black';
-
-      div_title.textContent = '(Pesquisas | Inativas-Finalizadas)';
+      cards[0].style.borderColor = 'black';
+      div_title.textContent = '(Solicitações de pesquisa | PENDENTES)';
       break;
-
     case 2:
-      pesqInativas.style.borderColor = 'silver';
-      pesqAtivas.style.borderColor = 'black';
-
-      div_title.textContent = '(Pesquisas | Ativas-Aguardando)';
+      cards[1].style.borderColor = 'black';
+      div_title.textContent = '(Solicitações de pesquisa | APROVADAS)';
+      break;
+    case 3:
+      cards[2].style.borderColor = 'black';
+      div_title.textContent = '(Solicitações de pesquisa | INDEFERIDO)';
+      break;
+    case 4:
+      cards[3].style.borderColor = 'black';
+      div_title.textContent = '(Solicitações de pesquisa | ENCERRADAS)';
       break;
   }
 }
@@ -40,9 +67,6 @@ function render_items(items) {
 
     const titulo = document.createElement('h5');
     titulo.textContent = item.acao_realizada;
-
-    // const status = document.createElement('span');
-    // status.innerHTML = `${item.status}`;
 
     const partesData = item.data_solicitacao.split('-');
     const data = document.createElement('p');
@@ -60,8 +84,7 @@ function render_items(items) {
   })
 }
 
-// Caso não seja recebido o parametro para new status, mantém o status atual
-function carregarPagina(numeroDaPagina, newStatus = currentStatus) {
+function carregarPagina(numeroDaPagina, newStatus) {
   fetch(`/manager/api_resp_pesq/?status=${newStatus}&page=${numeroDaPagina}`, {
     method: 'GET',
   })
@@ -91,5 +114,5 @@ btnProximo.addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   currentIcon(1);
-  carregarPagina(paginaAtual, false);
+  carregarPagina(paginaAtual, 'PENDENTE');
 });

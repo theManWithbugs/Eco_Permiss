@@ -220,24 +220,12 @@ def excluir_arq(request, id):
 #------------------------------------------------------------------#
 def resp_list_pesq(request):
   if not request.user.is_authenticated:
-    return JsonResponse(
-      {'error': 'Usuario não autenticado'},
-      status=401
-    )
+    return response_401()
 
   if not request.user.is_staff:
-    return JsonResponse(
-      {'error': 'Usuario não autorizado!'},
-      status=401
-    )
+    return response_403()
 
   status = request.GET.get('status')
-  if status.lower() == "true":
-    status = True
-  elif status.lower() == "false":
-    status = False
-  else:
-    return JsonResponse({'error': 'Status inválido'}, status=400)
 
   dados = DadosSolicPesquisa.objects.filter(status=status).order_by('-data_solicitacao')
 
@@ -300,68 +288,63 @@ def resp_list_ugai(request):
 
 def aprovar_pesq(request):
   if not request.user.is_authenticated:
-    return JsonResponse(
-      {'error': 'Usuario não autenticado'},
-      status=401
-    )
+    return response_401()
 
   if not request.user.is_staff:
-    return JsonResponse(
-      {'error': 'Usuario não autorizado!'},
-      status=401
-    )
+    return response_403()
 
-  if request.method == 'POST':
+  if request.method != 'POST':
+    return response_405()
+
+  try:
     data = json.loads(request.body)
+  except Exception:
+    return response_400('JSON inválido')
 
-    obj = get_object_or_404(DadosSolicPesquisa, id=data['id'])
+  pk = data.get('id')
 
-    gestor_resp = f"{request.user.first_name} {request.user.last_name}"
+  obj = get_object_or_404(DadosSolicPesquisa, id=pk)
 
-    if obj.status == False:
-      try:
-        obj.status = True
-        obj.gestor_resp = gestor_resp
-        obj.save()
+  gestor_resp = f"{request.user.first_name} {request.user.last_name}"
 
-        return JsonResponse({'status': 'ok', 'message': 'Aprovação realizada com sucesso!'}, status=200)
+  try:
+    obj.status = 'APROVADO'
+    obj.gestor_resp = gestor_resp
+    obj.save()
 
-      except DadosSolicPesquisa.DoesNotExist:
-        return JsonResponse({'status': 'error(404)', 'message': 'Pesquisa não encontrada!'}, status=404)
+    return response_200('Pesquisa aprovada com sucesso!')
 
-      except Exception as e:
-        return JsonResponse({'status': 'error(400)', 'message':  f'Ocorreu um erro: {e}'}, status=400)
-    else:
-      JsonResponse({'status': 'error(403)', 'message': 'Operação não permitida'}, status=403)
-  else:
-    return JsonResponse({'status': 'error(405)', 'message': 'Método não permitido!'}, status=405)
+  except DadosSolicPesquisa.DoesNotExist:
+    return response_404('Solicitação não encontrada')
 
+  except Exception as e:
+    return response_500(str(e))
 
 def aprovar_ugai(request):
 
     if not request.user.is_authenticated:
-        return response_401()
+      return response_401()
 
     if not request.user.is_staff:
-        return response_403()
+      return response_403()
 
     if request.method != 'POST':
-        return response_405()
+      return response_405()
 
     try:
-        data = json.loads(request.body)
+      data = json.loads(request.body)
     except Exception:
-        return response_400('JSON inválido')
+      return response_400('JSON inválido')
 
     pk = data.get('id')
 
     if not pk:
-        return response_400('ID ausente')
+      return response_400('ID ausente')
 
     try:
-        pk = UUID(pk)
+      pk = UUID(pk)
     except ValueError:
-        return response_400('UUID inválido')
+      return response_400('UUID inválido')
 
     try:
         with transaction.atomic():
@@ -371,21 +354,21 @@ def aprovar_ugai(request):
             ugai = solicitacao.ugai
 
             vagas = ugai.vagas_disponiveis(
-                solicitacao.data_inicio,
-                solicitacao.data_final
+              solicitacao.data_inicio,
+              solicitacao.data_final
             )
 
             if solicitacao.quantidade_pessoas > vagas:
-                return response_400(f"Restam apenas {vagas} vagas")
+              return response_400(f"Restam apenas {vagas} vagas")
 
             solicitacao.clean()
             solicitacao.status = 'APROVADO'
             solicitacao.save()
 
-            return response_200('UGAI aprovada com sucesso')
+            return response_200('UGAI aprovada com sucesso!')
 
     except SolicitacaoUgais.DoesNotExist:
-        return response_404('Solicitação não encontrada')
+      return response_404('Solicitação não encontrada')
 
     except Exception as e:
-        return response_500(str(e))
+      return response_500(str(e))

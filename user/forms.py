@@ -18,7 +18,7 @@ class DadosPesqForm(forms.ModelForm):
   class Meta:
     model = DadosSolicPesquisa
     fields = '__all__'
-    exclude = ['user_solic', 'data_solicitacao', 'status']
+    exclude = ['user_solic', 'data_solicitacao', 'status', 'gestor_resp']
     widgets = {
         'rel_final': forms.Textarea(attrs={
           'class': 'form-control form-control-sm',
@@ -33,7 +33,6 @@ class DadosPesqForm(forms.ModelForm):
     self.fields['foto'].widget.attrs.update({'class': 'form-select'})
     self.fields['area_atuacao'].widget.attrs.update({'class': 'form-select'})
     self.fields['tipo_solic'].widget.attrs.update({'class': 'form-select'})
-    self.fields['licenca_inst'].widget.attrs.update({'class': 'form-select'})
     self.fields['retorno_comuni'].widget.attrs.update({'class': 'form-select'})
     self.fields['inicio_atividade'].widget = forms.DateInput(attrs={
         'class': 'form-control form-control',

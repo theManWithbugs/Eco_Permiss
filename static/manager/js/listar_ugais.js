@@ -33,7 +33,7 @@ function currentIcon(value) {
       break;
     case 3:
       cards[2].style.borderColor = 'black';
-      div_title.textContent = '(Solicitações de UGAI | INVALIDADAS)';
+      div_title.textContent = '(Solicitações de UGAI | INDEFERIDO)';
       break;
     case 4:
       cards[3].style.borderColor = 'black';
@@ -69,7 +69,6 @@ function render_items(items) {
   })
 }
 
-// Caso não seja recebido o parametro para new status, mantém o status atual
 function carregarPagina(numeroDaPagina, newStatus) {
   fetch(`/manager/api_resp_ugai/?status=${newStatus}&page=${numeroDaPagina}`, {
     method: 'GET',

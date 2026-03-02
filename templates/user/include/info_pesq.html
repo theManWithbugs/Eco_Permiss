@@ -157,6 +157,11 @@
           </div>
         </div>
 
+        <!-- Precisar ser atualizado -->
+        {% if x.status != 'PENDENTE' and x.status != 'INDEFERIDO' %}
+          {{ x.gestor_resp }}
+        {% endif %}
+
         <!-- Seção 6: Arquivos -->
         <h5>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-arrow-down me-2" viewBox="0 0 16 16">
@@ -255,13 +260,14 @@
 
           <div class="row g-3">
             {% for x in membro_equip %}
-              <div class="col-md-6 col-lg-4">
+              <div class="col-md-12 col-lg-4">
                 <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
                   <div class="card-header"></div>
                   <div class="card-body">
                     <h5 class="card-title">{{ x.nome }}</h5>
                     <strong>RG:</strong> {{ x.rg }}<br>
                     <strong>CPF:</strong> {{ x.cpf }}<br>
+                    <strong>Email:</strong> {{ x.email }}<br>
                     <strong>Instituição: </strong>{{ x.instituicao }}<br>
                   </div>
                 </div>

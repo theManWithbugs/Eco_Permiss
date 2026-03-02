@@ -127,15 +127,13 @@ def editar_dados_pss(request):
 def realizar_solic(request):
     template_name = 'user/include/realizar_solic.html'
 
-    # dados_user = DadosPessoais.objects.filter(usuario=request.user).first()
     dados_user = get_object_or_404(DadosPessoais, usuario=request.user)
 
     MembroEquipeFormset = inlineformset_factory(
-            DadosSolicPesquisa, MembroEquipe, form=MembroEquipeForm,
-            extra=1, can_delete=True
-        )
+        DadosSolicPesquisa, MembroEquipe, form=MembroEquipeForm,
+        extra=1, can_delete=True
+    )
 
-    #Declaração de variaveis locais
     prefix = 'membros'
     form_solic = DadosPesqForm()
     formset = MembroEquipeFormset(prefix=prefix)
@@ -146,16 +144,14 @@ def realizar_solic(request):
 
         if form_type == 'solic_pesq':
             user = request.user
-
-            # POST
             form_solic = DadosPesqForm(request.POST)
             if form_solic.is_valid():
                 obj_paiSaved = form_solic.save(commit=False)
                 obj_paiSaved.user_solic = user
+                obj_paiSaved.status = 'PENDENTE'
                 obj_paiSaved.save()
 
                 formset = MembroEquipeFormset(request.POST, instance=obj_paiSaved, prefix=prefix)
-
                 if formset.is_valid():
                     try:
                         formset.save()
@@ -168,17 +164,17 @@ def realizar_solic(request):
                         email_solic_ugai(request, username, acao_realizada, data)
                         return redirect('user:realizar_solic')
                     except Exception as e:
-                        messages.error(request, f'ocorreu um erro: {e}')
+                        messages.error(request, f'Ocorreu um erro ao salvar os membros: {e}')
                 else:
-                    messages.error(request, f"Erro: {formset.errors}")
+                    messages.error(request, f"Erro nos membros: {formset.errors}")
             else:
+                # Se o form principal não for válido, reexibe o formset vazio
                 formset = MembroEquipeFormset(request.POST, prefix=prefix)
+                messages.error(request, f"Erro no formulário principal: {form_solic.errors}")
 
         elif form_type == 'aut_ugai':
-            form_ugai = Solic_Ugai(request.POST or None)
-
+            form_ugai = Solic_Ugai(request.POST)
             user = request.user
-
             if form_ugai.is_valid():
                 obj = form_ugai.save(commit=False)
                 obj.user_solic = user
@@ -196,9 +192,9 @@ def realizar_solic(request):
                     email_solic_ugai(request, username, ativ_desenv, data_br)
                     return redirect('user:realizar_solic')
                 except Exception as e:
-                    messages.error(request, f'ocorreu um erro: {e}')
+                    messages.error(request, f'Ocorreu um erro ao salvar a solicitação UGAI: {e}')
             else:
-                messages.error(request, f"Erros: {form_ugai.errors}")
+                messages.error(request, f"Erros no formulário UGAI: {form_ugai.errors}")
 
     context = {
         'form_solic': form_solic,

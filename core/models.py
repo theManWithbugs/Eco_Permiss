@@ -87,7 +87,7 @@ class DadosSolicPesquisa(models.Model):
                             null=False, verbose_name='Fotografia e imagens da UC?', max_length=3)
 
     licenca_inst = models.CharField(
-        blank=False, null=False, verbose_name='É necessario licença de instituição responsavel?/(especifique)', max_length=30)
+        blank=False, null=False, verbose_name='Licença de instituição?', max_length=30)
 
     inicio_atividade = models.DateField(default=timezone.localdate)
     final_atividade = models.DateField(default=timezone.localdate)
@@ -101,7 +101,7 @@ class DadosSolicPesquisa(models.Model):
     gestor_resp =  models.CharField(
         default='NA', max_length=80, verbose_name='Gestor responsavel:')
 
-    status = models.BooleanField(default=False)
+    status = models.CharField(choices=CHOICES_STATUS, blank=False, null=False, max_length=10)
 
     def __str__(self):
         return f"{self.data_solicitacao}"
@@ -122,10 +122,10 @@ class MembroEquipe(models.Model):
     nome = models.CharField(blank=False, null=False, max_length=80)
     rg = models.CharField(blank=False, null=False,
                           max_length=11, verbose_name='RG')
-    cpf = models.CharField(blank=False, null=False, validators=[
-                           validador_cpf], max_length=11, verbose_name='CPF')
+    cpf = models.CharField(blank=False, null=False, max_length=11, verbose_name='CPF')
     instituicao = models.CharField(
-        blank=False, null=False, verbose_name='Instiuições', max_length=80)
+        blank=False, null=False, verbose_name='Instituições', max_length=80)
+    email = models.CharField(max_length=80, blank=False, null=False, verbose_name='Email')
 
     def __str__(self):
         return f"{self.nome}"
