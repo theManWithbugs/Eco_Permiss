@@ -42,27 +42,37 @@ def logoutView(request):
 @login_required
 def home(request):
     template_name = 'user/commons/home.html'
+
     return render(request, template_name)
 
 def login_view(request):
   template_name = 'user/auth/login.html'
+
   if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    next_url = request.POST.get('next')
 
-        #Caso não exista vai retornar None
-        user = authenticate(request, username=username, password=password)
+    user = authenticate(request, username=username, password=password)
 
-        if user is not None:
-            try:
-                login(request, user)
-                return redirect('user:home')
-            except Exception as e:
-                messages.error(request, f'{e}')
-        else:
-            messages.error(request, 'Login ou senha incorretos!')
+    if user is not None:
+        try:
+          login(request, user)
 
-  return render(request, template_name)
+          #this can be come as boolean or str
+          if next_url and next_url != "None":
+            return redirect(next_url)
+
+          return redirect('user:home')
+
+        except Exception as e:
+          messages.error(request, f'{e}')
+    else:
+      messages.error(request, 'Login ou senha incorretos')
+
+  next_url = request.GET.get('next')
+
+  return render(request, template_name, {'next': next_url})
 
 @login_required
 def perfil(request):
@@ -252,7 +262,6 @@ def info_pesquisa(request, id):
             messages.success(request, 'Arquivo anexado com sucesso!')
             return redirect('user:info_pesq', id)
         else:
-            # print(f"Erros do form: {form.errors}")
             messages.error(request, 'Erro ao tentar salvar!')
 
     context = {

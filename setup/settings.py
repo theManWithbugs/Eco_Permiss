@@ -104,15 +104,26 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR / 'static')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR / 'media')
-LOGIN_URL = 'user:login'
+# LOGIN_URL = 'user:login'
+
+#Default URL goes above here
+LOGIN_REDIRECT_URL = '/user/'
+LOGIN_URL = '/user/login/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DEFAULT_FROM_EMAIL = ''
+# DEFAULT_FROM_EMAIL = ''
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-SERVER_EMAIL = 'seu_email@gmail.com'
+# SERVER_EMAIL = 'seu_email@gmail.com'
+
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+SERVER_EMAIL = config('DEFAULT_FROM_EMAIL')

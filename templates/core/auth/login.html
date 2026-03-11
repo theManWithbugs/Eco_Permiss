@@ -23,50 +23,48 @@
   {% endif %}
 
   <div class="container" style="margin-top: 6rem; backdrop-filter: blur(50px);">
-    <div>
-      <div class="container">
-        <form action="{% url 'manager:login' %}" method="post">
-          {% csrf_token %}
-          <div class="row">
-            <div class="col-md-8 d-flex justify-content-center">
-              <img src="{% static 'manager/img/dashboard_icon.png' %}" width="500px">
-            </div>
+    <div class="container">
+      <form action="{% url 'manager:login' %}" method="post">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-8 d-flex justify-content-center">
+            <img src="{% static 'manager/img/dashboard_icon.png' %}" width="500px">
+          </div>
 
-            <div class="col-md-4 bg-dark p-3">
-              <div class="mt-5 container align-items-center">
-                <div style="margin-top: 4rem;">
-                  <div class="container">
-                    <input required="" type="text" name="username" class="input">
-                    <label class="label">Usuario</label>
-                  </div>
-                  <br>
-                  <div class="container">
-                    <input required="" type="password" name="password" class="input">
-                    <label class="label">Senha</label>
-                  </div>
+          <div class="col-md-4 bg-dark p-3">
+            <div class="mt-5 container align-items-center">
+              <div style="margin-top: 4rem;">
+                <div class="container">
+                  <input required="" type="text" name="username" class="input">
+                  <label class="label">Usuario</label>
                 </div>
-
-                <div>
-                  <button class="animated-button mt-4" type="submit">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24">
-                      <path
-                        d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z">
-                      </path>
-                    </svg>
-                    <span class="text">L O G I N</span>
-                    <span class="circle"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24">
-                      <path
-                        d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z">
-                      </path>
-                    </svg>
-                  </button>
+                <br>
+                <div class="container">
+                  <input required="" type="password" name="password" class="input">
+                  <label class="label">Senha</label>
                 </div>
+              </div>
+              <input type="hidden" name="next" value="{{ next }}">
+              <div>
+                <button class="animated-button mt-4" type="submit">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24">
+                    <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218
+                      19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z">
+                    </path>
+                  </svg>
+                  <span class="text">L O G I N</span>
+                  <span class="circle"></span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24">
+                    <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218
+                      19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z">
+                    </path>
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   </div>
 

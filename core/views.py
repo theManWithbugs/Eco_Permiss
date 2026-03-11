@@ -8,13 +8,16 @@ from functools import wraps
 from django.forms import model_to_dict
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import logout as auth_logout
 from uuid import UUID
 
 from django.db import transaction
 
 #Local imports
 from core.models import *
-from core.utils import calcular_data
+from core.utils import calcular_data, email_ugai_recusada
+from core.forms import *
+from core.tasks import *
 
 #from rest framework to use JS fetch
 import json
@@ -95,9 +98,11 @@ def has_permiss(view_func):
 
 def login_as_manager(request):
   template_name = 'core/auth/login.html'
+
   if request.method == 'POST':
-    username =  request.POST.get('username')
+    username = request.POST.get('username')
     password = request.POST.get('password')
+    next_url = request.POST.get('next')
 
     user = authenticate(request, username=username, password=password)
 
@@ -108,13 +113,25 @@ def login_as_manager(request):
       else:
         try:
           login(request, user)
+
+          #this can be come as boolean or str
+          if next_url and next_url != "None":
+            return redirect(next_url)
+
           return redirect('manager:home')
+
         except Exception as e:
           messages.error(request, f'{e}')
     else:
-      messages.error(request, 'Login ou senha incorretos!')
+      messages.error(request, 'Login ou senha incorretos')
 
-  return render(request, template_name)
+  next_url = request.GET.get('next')
+
+  return render(request, template_name, {'next': next_url})
+
+def logoutView(request):
+  auth_logout(request)
+  return redirect('manager:login')
 
 @login_required
 @has_permiss
@@ -161,6 +178,26 @@ def info_ugai(request, id):
 
   return render(request, template_name, context)
 
+@login_required
+@has_permiss
+def reg_ugai(request):
+  template_name = 'core/include/reg_ugai.html'
+  form = RegUgaiForm(request.POST or None)
+
+  if request.method == 'POST':
+     if form.is_valid():
+        form.save()
+        messages.success(request, 'Operação realizada com sucesso!')
+        return redirect('manager:reg_ugai')
+  else:
+     form = RegUgaiForm()
+
+  context = {
+     'form': form
+  }
+
+  return render(request, template_name, context)
+
 #Only to render
 #------------------------------------------------------------------#
 
@@ -168,6 +205,13 @@ def info_ugai(request, id):
 @has_permiss
 def home(request):
   template_name = 'core/commons/home.html'
+
+  enviar_email.delay(
+    "wilianaraujo407@gmail.com",
+    "Olá, este email foi enviado com Celery"
+  )
+
+
   return render(request, template_name)
 
 @login_required
@@ -187,6 +231,21 @@ def listar_ugais(request):
 def dashboard(request):
   template_name = 'core/include/dashboard.html'
   return render(request, template_name)
+
+@login_required
+@has_permiss
+def dados_ugai(request, id):
+   template_name = 'core/include/dados_ugai.html'
+
+   ugai_selec = get_object_or_404(Ugai, id=id)
+   visitas = SolicitacaoUgais.objects.filter(ugai=ugai_selec, status='APROVADO')
+
+   context = {
+      'obj': ugai_selec,
+      'visitas': visitas
+   }
+
+   return render(request, template_name, context)
 
 #Only action
 #------------------------------------------------------------------#
@@ -372,3 +431,105 @@ def aprovar_ugai(request):
 
     except Exception as e:
       return response_500(str(e))
+
+def recusar_uso_ugai(request):
+  if not request.user.is_authenticated:
+    return response_401()
+
+  if not request.user.is_staff:
+    return response_403()
+
+  if request.method != 'POST':
+    return response_405()
+
+  try:
+    data = json.loads(request.body)
+  except Exception:
+    return response_400('JSON inválido')
+
+  gestor_resp = f"{request.user.first_name} {request.user.last_name}"
+
+  pk = data.get('id')
+  motivo = data.get('motivo')
+
+  link_solic = f"http://127.0.0.1:8000/user/info_ugai/{pk}/"
+  email_user = get_object_or_404(SolicitacaoUgais, id=pk).user_solic.email
+
+  try:
+    solicitacao = SolicitacaoUgais.objects.select_for_update().get(id=pk)
+
+    solicitacao.status = "INDEFERIDO"
+    solicitacao.recusa_motivo = motivo
+
+    email_ugai_recusada(request, motivo, email_user, gestor_resp, link_solic)
+
+    solicitacao.save()
+
+    return response_200('Ação realizada com sucesso!')
+
+  except SolicitacaoUgais.DoesNotExist:
+    return response_404('Solicitação não encontrada')
+
+  except Exception as e:
+    return response_500(str(e))
+
+#Get UGAIS data
+def current_data_ugais(request):
+  if not request.user.is_authenticated:
+    return response_401()
+
+  if not request.user.is_staff:
+    return response_403()
+
+  objs = Ugai.objects.all()
+
+  itens_json = []
+  for item in objs:
+    d = model_to_dict(item)
+    d['id'] = str(item.id)
+    itens_json.append(d)
+
+  return JsonResponse({
+    'objs': itens_json
+  })
+
+def recusar_pesquisa(request):
+  if not request.user.is_authenticated:
+    return response_401()
+
+  if not request.user.is_staff:
+    return response_403()
+
+  if request.method != 'POST':
+    return response_405()
+
+  try:
+    data = json.loads(request.body)
+  except Exception:
+    return response_400('JSON inválido')
+
+  pk = data.get('id')
+  motivo = data.get('motivo')
+
+  if not pk:
+    return response_400('ID ausente')
+
+  try:
+    pk = UUID(pk)
+  except ValueError:
+    return response_400('UUID inválido')
+
+  obj = get_object_or_404(DadosSolicPesquisa, id=pk)
+
+  try:
+    obj.recusa_motivo = motivo
+    obj.status = "INDEFERIDO";
+    obj.save()
+
+    return response_200('Ação realizada com sucesso!')
+
+  except DadosSolicPesquisa.DoesNotExist:
+    return response_404('Solicitação de pesquisa não encontrada')
+
+  except Exception as e:
+    return response_500(str(e))

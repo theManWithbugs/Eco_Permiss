@@ -1,3 +1,22 @@
+// ✅ Sucesso
+// 200 — OK
+// 201 — Created
+// 204 — No Content
+
+// ⚠️ Erro do cliente
+// 400 — Bad Request
+// 401 — Unauthorized
+// 405 Method Not Allowed
+// 403 — Forbidden
+// 404 — Not Found
+// 409 — Conflict
+// 422 — Unprocessable Entity
+
+// 💥 Erro do servidor
+// 500 — Internal Server Error
+// 503 — Service Unavailable
+
+//O método includes verifica se o valor passado existe dentro do array
 const pathParts = window.location.pathname.split('/');
 const current_id = pathParts[3];
 
@@ -19,49 +38,10 @@ function getCookie(name) {
 
 const csrftoken = getCookie('csrftoken');
 
-function resp_message(status, message) {
-  let config = {};
-
-  if ([400, 401, 403, 404].includes(status)) {
-    config = {
-      icon: "error",
-      title: "Erro",
-      text: message,
-      showConfirmButton: false,
-      timer: 1500,
-      position: 'top'
-    };
-  } else if ([405, 409, 422, 500, 503].includes(status)) {
-    config = {
-      icon: "warning",
-      title: "Alerta",
-      text: message,
-      showConfirmButton: false,
-      timer: 1500,
-      position: 'top'
-    };
-  } else {
-    config = {
-      icon: "success",
-      title: "Sucesso",
-      text: message,
-      showConfirmButton: false,
-      timer: 1500,
-      position: 'top'
-    };
-  }
-
-  //Aqui abre os sweet alert com essas configurações
-  Swal.fire(config).then(() => {
-    window.location.reload();
-  });
-}
-
-async function aprovarPesq() {
-
+async function aprovarUgai() {
   const result = await Swal.fire({
     title: "Tem certeza?",
-    text: "Você tem certeza que deseja aprovar a pesquisa?",
+    text: "Você tem certeza que deseja aprovar o uso da UGAI?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#3085d6",
@@ -76,7 +56,7 @@ async function aprovarPesq() {
   }
 
   try {
-    const response = await fetch(`/manager/api_aprovar_pesq/`, {
+    const response = await fetch(`/manager/api_aprovar_ugai/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -95,5 +75,36 @@ async function aprovarPesq() {
 
   } catch (error) {
     resp_message(500, "Erro de conexão com o servidor.");
+  }
+}
+
+async function recusarUsoUgai() {
+  const { value: text } = await Swal.fire({
+    input: "textarea",
+    inputLabel: "Motivo",
+    inputPlaceholder: "Digite aqui...",
+    inputAttributes: {
+      "aria-label": "Type your message here"
+    },
+    showCancelButton: true,
+    position: 'top'
+  });
+  if (text) {
+    try {
+      const response =  await fetch(`/manager/api_recusar_uso_ugai/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ id: current_id, motivo: text })
+      });
+
+      let data = {}
+
+      resp_message(response.status, data.message || "Operação realizada.");
+    } catch (error) {
+      resp_message(500, "Erro de conexão com o servidor.");
+    }
   }
 }

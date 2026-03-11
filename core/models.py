@@ -22,7 +22,7 @@ class DadosPessoais(models.Model):
     usuario = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name='usuario')
     nome = models.CharField(blank=False, null=False, max_length=80, verbose_name='Nome completo:')
-    sexo = models.CharField(choices=SEXO, blank=False, null=False, max_length=10)
+    sexo = models.CharField(choices=SEXO, blank=False, null=False, max_length=2)
     estado = models.CharField(
         choices=ESTADOS_BRASIL_CHOICES, blank=False, null=False, max_length=20)
     municipio = models.CharField(blank=False, null=False, max_length=30)
@@ -42,8 +42,7 @@ class DadosPessoais(models.Model):
                            max_length=8, verbose_name='CEP')
     profis = models.CharField(blank=False, null=False,
                               max_length=30, verbose_name='Profissão/Ocupação')
-    email = models.CharField(blank=True, null=True,
-                             default='NA', max_length=80)
+    email = models.CharField(blank=False, null=False, max_length=80)
 
     def __str__(self):
         return f"{self.nome}"
@@ -101,6 +100,8 @@ class DadosSolicPesquisa(models.Model):
     gestor_resp =  models.CharField(
         default='NA', max_length=80, verbose_name='Gestor responsavel:')
 
+    recusa_motivo = models.CharField(max_length=400, blank=True, null=True)
+
     status = models.CharField(choices=CHOICES_STATUS, blank=False, null=False, max_length=10)
 
     def __str__(self):
@@ -126,6 +127,16 @@ class MembroEquipe(models.Model):
     instituicao = models.CharField(
         blank=False, null=False, verbose_name='Instituições', max_length=80)
     email = models.CharField(max_length=80, blank=False, null=False, verbose_name='Email')
+
+    email_enviado = models.BooleanField(default=False)
+    confirmado = models.BooleanField(default=False)
+    token_confirmacao = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    data_confirmacao = models.DateTimeField(null=True, blank=True)
+
+    def confirmar(self):
+        self.confirmado = True
+        self.data_confirmacao = timezone.now()
+        self.save()
 
     def __str__(self):
         return f"{self.nome}"
@@ -200,6 +211,8 @@ class SolicitacaoUgais(models.Model):
 
     ativ_desenv = models.CharField(max_length=80, blank=False, null=False, verbose_name='Atividades que irá desenvolver')
     publico_alvo = models.CharField(max_length=80, blank=False, null=False, verbose_name='Público alvo')
+
+    recusa_motivo = models.CharField(max_length=400, blank=True, null=True)
 
     status = models.CharField(choices=CHOICES_STATUS, blank=False, null=False, max_length=10)
 

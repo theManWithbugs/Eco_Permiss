@@ -220,3 +220,50 @@ def email_ugai_aprov(request, username):
   except Exception as e:
     messages.error(request, f'ocorreu um erro: {e}')
     return False
+
+def email_ugai_recusada(request, mensagem, email_user, gestor_resp, link_solic):
+    assunto = "STATUS: Solicitação para uso de UGAI"
+    destinatarios = [email_user]
+    html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+
+                <h2 style="color:#2c3e50;">
+                    Sua solicitação para uso de UGAI não foi aprovada
+                </h2>
+
+                <p style="font-size: 18px;">
+                    {mensagem}<br>
+                </p>
+
+                <p style="font-size: 15px;">
+                    <strong>Gestor responsavel:</strong> {gestor_resp}<br>
+                </p>
+
+                <a href="{link_solic}">
+                    visualizar solicitação
+                </a>
+
+                <br>
+                <p style="font-size: 14px; color:#555;">
+                    Atenciosamente<br>
+                    <strong>SEMA - ECO Permis</strong>
+                </p>
+
+            </body>
+        </html>
+    """
+    try:
+        email = EmailMultiAlternatives(
+            subject=assunto,
+            body=mensagem,
+            from_email=settings.EMAIL_HOST_USER,
+            to=destinatarios
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send()
+        return True
+
+    except Exception as e:
+        messages.error(request, f'ocorreu um erro: {e}')
+        return False

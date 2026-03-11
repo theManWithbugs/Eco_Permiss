@@ -13,7 +13,12 @@ TIPO_SOLIC = (
 SEXO = (
   ('NA', 'Selecione'),
   ('M', 'Masculino'),
-  ('F', 'Feminino')
+  ('F', 'Feminino'),
+  ('NB', 'Não binário'),
+  ('AG', 'Agênero'),
+  ('GF', 'Gênero fluido'),
+  ('OT', 'Outro'),
+  ('PN', 'Prefiro não informar'),
 )
 
 ESTADOS_BRASIL_CHOICES = [

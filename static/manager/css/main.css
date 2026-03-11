@@ -7,6 +7,21 @@ body {
   padding-right: 0 !important;
 }
 
+.menu_home {
+  background-color: white;
+  border: solid 2px black;
+  border-radius: 5px;
+  max-width: 12rem;
+}
+
+/* .menu_home img {
+  max-width: 10rem;
+} */
+
+.menu_home:hover {
+  border-color: blue;
+}
+
 #content {
   margin-top: 30px;
   position: relative;

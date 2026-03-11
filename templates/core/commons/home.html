@@ -1,8 +1,38 @@
 {% extends 'core/commons/base.html' %}
 {% load static %}
 
-{% block css %}{% endblock css %}
+{% block css %}
+  <link rel="stylesheet" href="{% static 'manager/css/btn_white_simple.css' %}">
+{% endblock css %}
 
 {% block content %}
+
+<div class="container p-3 rounded" style="background: linear-gradient(to right, #808080, #000000, #ffffff);">
+    <div class="row align-items-start">
+        <div class="col p-1">
+            <a href="{% url 'manager:listar_pesq' %}" class="d-flex justify-content-center">
+                <img src="{% static 'manager/img/solic_ucs_img_hd.png' %}" class= "menu_home">
+            </a>
+        </div>
+
+        <div class="col p-1">
+            <a href="{% url 'manager:listar_ugais' %}" class="d-flex justify-content-center">
+                <img src="{% static 'manager/img/img_ugais_hd.png' %}" class="menu_home">
+            </a>
+        </div>
+
+        <div class="col p-1">
+            <a href="{% url 'manager:reg_ugai' %}" class="fs-5 d-flex justify-content-center">
+                <img src="{% static 'manager/img/img_gestão_ugais.png' %}" class="menu_home">
+            </a>
+        </div>
+
+        <div class="col p-1">
+            <a href="{% url 'manager:dashboard' %}" class="fs-5 d-flex justify-content-center">
+                <img src="{% static 'manager/img/dashboard_img_hd.png' %}" class="menu_home">
+            </a>
+        </div>
+    </div>
+</div>
 
 {% endblock content %}

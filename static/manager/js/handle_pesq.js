@@ -1,4 +1,3 @@
-
 // ✅ Sucesso
 // 200 — OK
 // 201 — Created
@@ -18,7 +17,6 @@
 // 503 — Service Unavailable
 
 //O método includes verifica se o valor passado existe dentro do array
-
 const pathParts = window.location.pathname.split('/');
 const current_id = pathParts[3];
 
@@ -40,48 +38,11 @@ function getCookie(name) {
 
 const csrftoken = getCookie('csrftoken');
 
-function resp_message(status, message) {
-  let config = {};
+async function aprovarPesq() {
 
-  if ([400, 401, 403, 404].includes(status)) {
-    config = {
-      icon: "error",
-      title: "Erro",
-      text: message,
-      showConfirmButton: false,
-      timer: 1500,
-      position: 'top'
-    };
-  } else if ([405, 409, 422, 500, 503].includes(status)) {
-    config = {
-      icon: "warning",
-      title: "Alerta",
-      text: message,
-      showConfirmButton: false,
-      timer: 1500,
-      position: 'top'
-    };
-  } else {
-    config = {
-      icon: "success",
-      title: "Sucesso",
-      text: message,
-      showConfirmButton: false,
-      timer: 1500,
-      position: 'top'
-    };
-  }
-
-  //Aqui abre os sweet alert com essas configurações
-  Swal.fire(config).then(() => {
-    window.location.reload();
-  });
-}
-
-async function aprovarUgai() {
   const result = await Swal.fire({
     title: "Tem certeza?",
-    text: "Você tem certeza que deseja aprovar o uso da UGAI?",
+    text: "Você tem certeza que deseja aprovar a pesquisa?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#3085d6",
@@ -96,7 +57,7 @@ async function aprovarUgai() {
   }
 
   try {
-    const response = await fetch(`/manager/api_aprovar_ugai/`, {
+    const response = await fetch(`/manager/api_aprovar_pesq/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -115,5 +76,34 @@ async function aprovarUgai() {
 
   } catch (error) {
     resp_message(500, "Erro de conexão com o servidor.");
+  }
+}
+
+async function recusarPesq() {
+  const { value: text } = await Swal.fire({
+  input: "textarea",
+  inputLabel: "Motivo",
+  inputAttributes: {
+    "aria-label": "Digite aqui..."
+  },
+  showCancelButton: true,
+  position: 'top'
+  });
+  if (text) {
+    try {
+      const response = await fetch(`/manager/api_recusar_pesq/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ id: current_id, motivo: text })
+      });
+
+      let data = {}
+      resp_message(response.status, data.message || "Operação realizada.");
+    } catch (error) {
+      resp_message(500, "Erro de conexão com o servidor.");
+    }
   }
 }

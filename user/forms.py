@@ -47,6 +47,7 @@ class MembroEquipeForm(forms.ModelForm):
   class Meta:
     model = MembroEquipe
     fields = '__all__'
+    exclude = ['email_enviado', 'confirmado', 'token_confirmacao', 'data_confirmacao']
 
   def __init__(self, *args, **kwargs):
     super(MembroEquipeForm, self).__init__(*args, **kwargs)

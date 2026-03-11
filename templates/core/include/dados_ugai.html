@@ -1,0 +1,24 @@
+{% extends 'core/commons/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container py-4">
+  <div class="bg-white rounded shadow p-4 mx-auto" style="max-width: 500px;">
+    <h4 class="fw-bold text-success text-center mb-3">UGAI: {{ obj.nome }}</h4>
+    <h6 class="text-center mb-3">Capacidade total: <span class="fw-bold text-primary">{{ obj.total_vagas }}</span> visitantes</h6>
+    <hr>
+    <h5 class="text-center mb-3">Visitas em andamento</h5>
+    {% if visitas %}
+      <ul class="list-group mb-2">
+        {% for x in visitas %}
+          <li class="list-group-item">{{ x }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="alert alert-info text-center">Não existem visitas em andamento</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock content %}

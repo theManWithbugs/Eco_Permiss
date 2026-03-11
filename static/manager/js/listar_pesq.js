@@ -13,22 +13,6 @@ const pesqAtivas = document.getElementById('pesqAtivas');
 
 const div_title = document.getElementById('title_page');
 function currentIcon(value) {
-  // switch (value) {
-  //   case 1:
-  //     pesqAtivas.style.borderColor = 'silver';
-  //     pesqInativas.style.borderColor = 'black';
-
-  //     div_title.textContent = '(Pesquisas | Inativas-Finalizadas)';
-  //     break;
-
-  //   case 2:
-  //     pesqInativas.style.borderColor = 'silver';
-  //     pesqAtivas.style.borderColor = 'black';
-
-  //     div_title.textContent = '(Pesquisas | Ativas-Aguardando)';
-  //     break;
-  // }
-
   const cards = [
     document.getElementById('pesqInativas'),
     document.querySelectorAll('#pesqAtivas')[0],
@@ -90,7 +74,6 @@ function carregarPagina(numeroDaPagina, newStatus) {
   })
   .then(response => response.json())
   .then(data => {
-    console.log('API Response:', data);
     render_items(data.objs);
     currentStatus = newStatus;
 
