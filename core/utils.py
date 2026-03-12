@@ -1,9 +1,4 @@
-from django.core.mail import EmailMultiAlternatives
-# from django.shortcuts import redirect
-from django.contrib import messages
-from django.conf import settings
-
-from .models import *
+from .tasks import send_email
 
 def format_data_br(data):
   data = data.split('-')
@@ -55,215 +50,313 @@ def calcular_data(data_inicio, data_final):
 
   return duracao
 
-def email_solic_ugai(request, username, ativ_desenv, data_br):
-  assunto = "STATUS: Aguardando aprovação"
-  texto_simples = "Sua pesquisa foi solicitada com sucesso!"
-  destinatarios = ['wilianaraujo407@gmail.com']
-  html_content = f"""
-  <html>
-    <body style="font-family: Arial, sans-serif; color: #333;">
+def email_pesq_aprov(email):
+    url = "http://127.0.0.1:8000/user/minhas_solic_pesq/"
 
-        <h2 style="color:#2c3e50;">
-            Autorização para uso de UGAI solicitado com sucesso!
-        </h2>
+    mensagem_html = f"""
+    <html>
+    <body style="margin:0; padding:0; font-family: Arial, sans-serif; background:#f4f6f8;">
 
-        <p style="font-size: 15px;">
-            <strong>Solicitante:</strong> {username}<br>
-            <strong>Atividade a desenvolver:</strong> {ativ_desenv}<br>
-            <strong>Data da solicitação:</strong> {data_br}
-        </p>
+        <div style="max-width:600px; margin:40px auto; background:#ffffff;
+                    padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
 
-        <br>
-        <p style="font-size: 14px; color:#555;">
-            Atenciosamente<br>
-            <strong>SEMA - ECO Permis</strong>
-        </p>
+            <h2 style="color:#27ae60; text-align:center;">
+                Solicitação de Pesquisa Aprovada
+            </h2>
+
+            <p style="font-size:16px;">
+                Olá,
+            </p>
+
+            <p style="font-size:16px;">
+                Informamos que sua <strong>solicitação de pesquisa</strong> foi analisada
+                e <strong>aprovada com sucesso</strong> pelo gestor responsável.
+            </p>
+
+            <div style="background:#eafaf1; padding:15px; border-radius:6px;
+                        border-left:5px solid #27ae60; margin:20px 0;">
+                Sua pesquisa já pode ser iniciada. Todas as informações e o acompanhamento
+                da solicitação podem ser feitos pelo sistema de gestão.
+            </div>
+
+            <div style="text-align:center; margin:25px 0;">
+                <a href="{url}"
+                   style="background:#2c3e50; color:#ffffff; padding:12px 25px;
+                          text-decoration:none; border-radius:5px; font-weight:bold;">
+                   Acessar minhas solicitações
+                </a>
+            </div>
+
+            <p style="font-size:15px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Gestão de UCs</strong>
+            </p>
+
+            <hr style="margin-top:30px; border:none; border-top:1px solid #eee;">
+
+            <p style="font-size:12px; color:#888; text-align:center;">
+                Este é um e-mail automático. Por favor, não responda esta mensagem.
+            </p>
+
+        </div>
 
     </body>
-  </html>
-  """
-
-  try:
-    email = EmailMultiAlternatives(
-            subject=assunto,
-            body=texto_simples,
-            from_email=settings.EMAIL_HOST_USER,
-            to=destinatarios
-    )
-
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-    return True
-
-  except Exception as e:
-    messages.error(request, f'ocorreu um erro: {e}')
-    return False
-
-def email_solic_ugai(request, username, acao_realizada, data):
-  assunto = "STATUS: Aguardando aprovação"
-  texto_simples = "Sua pesquisa foi solicitada com sucesso!"
-  destinatarios = ['wilianaraujo407@gmail.com']
-  html_content = f"""
-  <html>
-      <body style="font-family: Arial, sans-serif; color: #333;">
-
-          <h2 style="color:#2c3e50;">
-              Pesquisa Solicitada com Sucesso!
-          </h2>
-
-          <p style="font-size: 15px;">
-              <strong>Solicitante:</strong> {username}<br>
-              <strong>Ação a ser realizada:</strong> {acao_realizada}<br>
-              <strong>Data da solicitação:</strong> {data}
-          </p>
-
-          <br>
-          <p style="font-size: 14px; color:#555;">
-              Atenciosamente<br>
-              <strong>SEMA - ECO Permis</strong>
-          </p>
-
-      </body>
-  </html>
-  """
-  try:
-    email = EmailMultiAlternatives(
-          subject=assunto,
-          body=texto_simples,
-          from_email=settings.EMAIL_HOST_USER,
-          to=destinatarios
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-    return True
-
-  except Exception as e:
-    messages.error(request, f'ocorreu um erro: {e}')
-    return False
-
-def email_pesq_aprov(request, username):
-  assunto = "STATUS: pesquisa aprovada com sucesso!"
-  texto_simples = "Sua pesquisa foi aprovada com sucesso!"
-  destinatarios = ['wilianaraujo407@gmail.com']
-  html_content = f"""
-  <html>
-      <body style="font-family: Arial, sans-serif; color: #333;">
-
-          <h2 style="color:#2c3e50;">
-              Pesquisa aprovada!
-          </h2>
-
-          <p style="font-size: 15px;">
-              <strong>Gestor responsavel:</strong> {username}<br>
-          </p>
-
-          <br>
-          <p style="font-size: 14px; color:#555;">
-              Atenciosamente<br>
-              <strong>SEMA - ECO Permis</strong>
-          </p>
-
-      </body>
-  </html>
-  """
-  try:
-    email = EmailMultiAlternatives(
-          subject=assunto,
-          body=texto_simples,
-          from_email=settings.EMAIL_HOST_USER,
-          to=destinatarios
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-    return True
-
-  except Exception as e:
-    messages.error(request, f'ocorreu um erro: {e}')
-    return False
-
-def email_ugai_aprov(request, username):
-  assunto = "STATUS: Solicitação para uso de UGAI"
-  texto_simples = "Sua solicitação para uso de UGAI foi aprovada com sucesso!"
-  destinatarios = ['wilianaraujo407@gmail.com']
-  html_content = f"""
-  <html>
-      <body style="font-family: Arial, sans-serif; color: #333;">
-
-          <h2 style="color:#2c3e50;">
-              Uso de ugai aprovado!
-          </h2>
-
-          <p style="font-size: 15px;">
-              <strong>Gestor responsavel:</strong> {username}<br>
-          </p>
-
-          <br>
-          <p style="font-size: 14px; color:#555;">
-              Atenciosamente<br>
-              <strong>SEMA - ECO Permis</strong>
-          </p>
-
-      </body>
-  </html>
-  """
-  try:
-    email = EmailMultiAlternatives(
-          subject=assunto,
-          body=texto_simples,
-          from_email=settings.EMAIL_HOST_USER,
-          to=destinatarios
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-    return True
-
-  except Exception as e:
-    messages.error(request, f'ocorreu um erro: {e}')
-    return False
-
-def email_ugai_recusada(request, mensagem, email_user, gestor_resp, link_solic):
-    assunto = "STATUS: Solicitação para uso de UGAI"
-    destinatarios = [email_user]
-    html_content = f"""
-        <html>
-            <body style="font-family: Arial, sans-serif; color: #333;">
-
-                <h2 style="color:#2c3e50;">
-                    Sua solicitação para uso de UGAI não foi aprovada
-                </h2>
-
-                <p style="font-size: 18px;">
-                    {mensagem}<br>
-                </p>
-
-                <p style="font-size: 15px;">
-                    <strong>Gestor responsavel:</strong> {gestor_resp}<br>
-                </p>
-
-                <a href="{link_solic}">
-                    visualizar solicitação
-                </a>
-
-                <br>
-                <p style="font-size: 14px; color:#555;">
-                    Atenciosamente<br>
-                    <strong>SEMA - ECO Permis</strong>
-                </p>
-
-            </body>
-        </html>
+    </html>
     """
-    try:
-        email = EmailMultiAlternatives(
-            subject=assunto,
-            body=mensagem,
-            from_email=settings.EMAIL_HOST_USER,
-            to=destinatarios
-        )
-        email.attach_alternative(html_content, "text/html")
-        email.send()
-        return True
 
-    except Exception as e:
-        messages.error(request, f'ocorreu um erro: {e}')
-        return False
+    mensagem_texto = f"""
+    Olá,
+
+    Informamos que sua solicitação de pesquisa foi aprovada com sucesso pelo gestor responsável.
+
+    Sua pesquisa já pode ser iniciada.
+
+    Acompanhe sua solicitação pelo sistema:
+    {url}
+
+    Atenciosamente,
+    Equipe de Gestão de UCs
+
+    Este é um e-mail automático. Por favor, não responda.
+    """
+
+    subject = "Solicitação de pesquisa aprovada"
+
+    send_email.delay(email, mensagem_texto, mensagem_html, subject)
+
+def email_ugai_aprov(email):
+    url = "http://127.0.0.1:8000/user/minhas_solic_ugai/"
+
+    mensagem_html = f"""
+    <html>
+    <body style="margin:0; padding:0; font-family: Arial, sans-serif; background:#f4f6f8;">
+
+        <div style="max-width:600px; margin:40px auto; background:#ffffff;
+                    padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+
+            <h2 style="color:#27ae60; text-align:center;">
+                Solicitação para uso de UGAI Aprovada
+            </h2>
+
+            <p style="font-size:16px;">
+                Olá,
+            </p>
+
+            <p style="font-size:16px;">
+                Informamos que sua <strong>solicitação para utilização de UGAI</strong>
+                foi analisada e <strong>aprovada pelo gestor responsável</strong>.
+            </p>
+
+            <div style="background:#eafaf1; padding:15px; border-radius:6px;
+                        border-left:5px solid #27ae60; margin:20px 0;">
+                Caso seja necessário consultar informações como prazo de residência
+                ou detalhes da solicitação, elas podem ser verificadas diretamente
+                no sistema.
+            </div>
+
+            <div style="text-align:center; margin:25px 0;">
+                <a href="{url}"
+                   style="background:#2c3e50; color:#ffffff; padding:12px 25px;
+                          text-decoration:none; border-radius:5px; font-weight:bold;">
+                   Acessar minhas solicitações
+                </a>
+            </div>
+
+            <p style="font-size:15px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Gestão de UGAIs</strong>
+            </p>
+
+            <hr style="margin-top:30px; border:none; border-top:1px solid #eee;">
+
+            <p style="font-size:12px; color:#888; text-align:center;">
+                Este é um e-mail automático. Por favor, não responda esta mensagem.
+            </p>
+
+        </div>
+
+    </body>
+    </html>
+    """
+
+    mensagem_texto = f"""
+        Olá,
+
+        Informamos que sua solicitação para uso de UGAI foi aprovada com sucesso.
+
+        Você pode consultar detalhes da solicitação e o prazo de residência no sistema:
+        {url}
+
+        Atenciosamente,
+        Equipe de Gestão de UGAIs
+
+        Este é um e-mail automático. Por favor, não responda.
+        """
+
+    subject = "Solicitação para uso de UGAI aprovada"
+
+    send_email.delay(email, mensagem_texto, mensagem_html, subject)
+
+def email_recus_pesq(email, motivo):
+    url = "http://127.0.0.1:8000/user/minhas_solic_pesq/"
+
+    mensagem_html = f"""
+    <html>
+    <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f6f8;">
+
+        <div style="max-width:600px; margin:40px auto; background:#ffffff;
+                    border-radius:8px; padding:30px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+
+            <h2 style="color:#c0392b; text-align:center;">
+                Solicitação de Pesquisa Recusada
+            </h2>
+
+            <p style="font-size:16px;">
+                Olá,
+            </p>
+
+            <p style="font-size:16px;">
+                Informamos que sua <strong>solicitação de autorização para pesquisa</strong> foi analisada e infelizmente <strong>não foi aprovada</strong>.
+            </p>
+
+            <div style="background:#f8d7da; padding:15px; border-radius:6px;
+                        border-left:5px solid #c0392b; margin:20px 0;">
+                <strong>Motivo da recusa:</strong>
+                <p style="margin-top:8px;">
+                    {motivo}
+                </p>
+            </div>
+
+            <p style="font-size:15px;">
+                Caso deseje consultar ou realizar nova solicitação, acesse o sistema pelo botão abaixo:
+            </p>
+
+            <div style="text-align:center; margin:25px 0;">
+                <a href="{url}"
+                   style="background:#2c3e50; color:#ffffff; padding:12px 25px;
+                          text-decoration:none; border-radius:5px; font-weight:bold;">
+                   Acessar minhas solicitações
+                </a>
+            </div>
+
+            <p style="font-size:15px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Gestão de UCs</strong>
+            </p>
+
+            <hr style="margin-top:30px; border:none; border-top:1px solid #eee;">
+
+            <p style="font-size:12px; color:#888; text-align:center;">
+                Este é um e-mail automático. Por favor, não responda esta mensagem.
+            </p>
+
+        </div>
+
+    </body>
+    </html>
+    """
+
+    mensagem_texto = f"""
+        Olá,
+
+        Informamos que sua solicitação de autorização para pesquisa foi recusada.
+
+        Motivo da recusa:
+        {motivo}
+
+        Acesse o sistema para verificar suas solicitações:
+        {url}
+
+        Atenciosamente,
+        Equipe de Gestão de UCs
+
+        Este é um e-mail automático. Por favor, não responda.
+        """
+
+    subject = "Solicitação de pesquisa recusada"
+
+    send_email.delay(email, mensagem_texto, mensagem_html, subject)
+
+    return
+
+def email_recus_ugai(email, motivo):
+    url = "http://127.0.0.1:8000/user/minhas_solic_ugai/"
+
+    mensagem_html = f"""
+    <html>
+    <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f6f8;">
+
+        <div style="max-width:600px; margin:40px auto; background:#ffffff;
+                    border-radius:8px; padding:30px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+
+            <h2 style="color:#c0392b; text-align:center;">
+                Solicitação de uso de UGAI Recusada
+            </h2>
+
+            <p style="font-size:16px;">
+                Olá,
+            </p>
+
+            <p style="font-size:16px;">
+                Informamos que sua <strong>solicitação de autorização para uso de UGAI</strong> foi analisada e infelizmente <strong>não foi aprovada</strong>.
+            </p>
+
+            <div style="background:#f8d7da; padding:15px; border-radius:6px;
+                        border-left:5px solid #c0392b; margin:20px 0;">
+                <strong>Motivo da recusa:</strong>
+                <p style="margin-top:8px;">
+                    {motivo}
+                </p>
+            </div>
+
+            <p style="font-size:15px;">
+                Caso deseje consultar ou realizar nova solicitação, acesse o sistema pelo botão abaixo:
+            </p>
+
+            <div style="text-align:center; margin:25px 0;">
+                <a href="{url}"
+                   style="background:#2c3e50; color:#ffffff; padding:12px 25px;
+                          text-decoration:none; border-radius:5px; font-weight:bold;">
+                   Acessar minhas solicitações
+                </a>
+            </div>
+
+            <p style="font-size:15px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Gestão de UGAIs</strong>
+            </p>
+
+            <hr style="margin-top:30px; border:none; border-top:1px solid #eee;">
+
+            <p style="font-size:12px; color:#888; text-align:center;">
+                Este é um e-mail automático. Por favor, não responda esta mensagem.
+            </p>
+
+        </div>
+
+    </body>
+    </html>
+    """
+
+    mensagem_texto = f"""
+        Olá,
+
+        Informamos que sua solicitação de autorização para uso de UGAI foi recusada.
+
+        Motivo da recusa:
+        {motivo}
+
+        Acesse o sistema para verificar suas solicitações:
+        {url}
+
+        Atenciosamente,
+        Equipe de Gestão de UGAIs
+
+        Este é um e-mail automático. Por favor, não responda.
+        """
+
+    subject = "Solicitação de uso de UGAI Recusada"
+
+    send_email.delay(email, mensagem_texto, mensagem_html, subject)
+
+    return

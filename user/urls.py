@@ -16,6 +16,8 @@ urlpatterns = [
   #-----------------------------------------------------------------------#
 
   #-----------------------------------------------------------------------#
+  path('conf_email_equip/<uuid:id>/', views.confirm_email_equip, name='confirm_email_equip'),
+
   path('solicitar/', views.realizar_solic, name='realizar_solic'),
 
   #Renderizar solicitações de pesquisa

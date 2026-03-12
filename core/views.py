@@ -1,5 +1,3 @@
-from datetime import date
-
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
@@ -15,9 +13,8 @@ from django.db import transaction
 
 #Local imports
 from core.models import *
-from core.utils import calcular_data, email_ugai_recusada
+from core.utils import calcular_data, email_pesq_aprov, email_ugai_aprov, email_recus_pesq, email_recus_ugai
 from core.forms import *
-from core.tasks import *
 
 #from rest framework to use JS fetch
 import json
@@ -205,13 +202,6 @@ def reg_ugai(request):
 @has_permiss
 def home(request):
   template_name = 'core/commons/home.html'
-
-  enviar_email.delay(
-    "wilianaraujo407@gmail.com",
-    "Olá, este email foi enviado com Celery"
-  )
-
-
   return render(request, template_name)
 
 @login_required
@@ -366,10 +356,14 @@ def aprovar_pesq(request):
 
   gestor_resp = f"{request.user.first_name} {request.user.last_name}"
 
+  email_to_send = DadosPessoais.objects.filter(usuario=obj.user_solic.id).first().email
+
   try:
     obj.status = 'APROVADO'
     obj.gestor_resp = gestor_resp
     obj.save()
+
+    email_pesq_aprov(email_to_send)
 
     return response_200('Pesquisa aprovada com sucesso!')
 
@@ -396,6 +390,9 @@ def aprovar_ugai(request):
       return response_400('JSON inválido')
 
     pk = data.get('id')
+
+    obj = get_object_or_404(SolicitacaoUgais, id=pk)
+    email_to_send = DadosPessoais.objects.filter(usuario=obj.user_solic.id).first().email
 
     if not pk:
       return response_400('ID ausente')
@@ -424,6 +421,8 @@ def aprovar_ugai(request):
             solicitacao.status = 'APROVADO'
             solicitacao.save()
 
+            email_ugai_aprov(email_to_send)
+
             return response_200('UGAI aprovada com sucesso!')
 
     except SolicitacaoUgais.DoesNotExist:
@@ -447,13 +446,11 @@ def recusar_uso_ugai(request):
   except Exception:
     return response_400('JSON inválido')
 
-  gestor_resp = f"{request.user.first_name} {request.user.last_name}"
-
   pk = data.get('id')
   motivo = data.get('motivo')
 
-  link_solic = f"http://127.0.0.1:8000/user/info_ugai/{pk}/"
-  email_user = get_object_or_404(SolicitacaoUgais, id=pk).user_solic.email
+  obj = get_object_or_404(SolicitacaoUgais, id=pk)
+  email_to_send = DadosPessoais.objects.filter(usuario=obj.user_solic.id).first().email
 
   try:
     solicitacao = SolicitacaoUgais.objects.select_for_update().get(id=pk)
@@ -461,9 +458,9 @@ def recusar_uso_ugai(request):
     solicitacao.status = "INDEFERIDO"
     solicitacao.recusa_motivo = motivo
 
-    email_ugai_recusada(request, motivo, email_user, gestor_resp, link_solic)
-
     solicitacao.save()
+
+    email_recus_ugai(email_to_send, motivo)
 
     return response_200('Ação realizada com sucesso!')
 
@@ -520,11 +517,14 @@ def recusar_pesquisa(request):
     return response_400('UUID inválido')
 
   obj = get_object_or_404(DadosSolicPesquisa, id=pk)
+  email_to_send = DadosPessoais.objects.filter(usuario=obj.user_solic.id).first().email
 
   try:
     obj.recusa_motivo = motivo
     obj.status = "INDEFERIDO";
     obj.save()
+
+    email_recus_pesq(email_to_send, motivo)
 
     return response_200('Ação realizada com sucesso!')
 

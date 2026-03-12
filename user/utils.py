@@ -1,6 +1,4 @@
-from django.core.mail import EmailMultiAlternatives
-from django.contrib import messages
-from django.conf import settings
+from core.tasks import send_email
 
 def format_data_br(data):
   data = data.split('-')
@@ -9,168 +7,259 @@ def format_data_br(data):
 
   return data
 
-def email_solic_ugai(request, username, ativ_desenv, data_br):
-  assunto = "STATUS: Aguardando aprovação"
-  texto_simples = "Sua pesquisa foi solicitada com sucesso!"
-  destinatarios = ['wilianaraujo407@gmail.com']
-  html_content = f"""
-  <html>
-    <body style="font-family: Arial, sans-serif; color: #333;">
 
-        <h2 style="color:#2c3e50;">
-            Autorização para uso de UGAI solicitado com sucesso!
-        </h2>
+#Funções de enviar email refatoradas
+#------------------------------------------------------------------#
+#------------------------------------------------------------------#
 
-        <p style="font-size: 15px;">
-            <strong>Solicitante:</strong> {username}<br>
-            <strong>Atividade a desenvolver:</strong> {ativ_desenv}<br>
-            <strong>Data da solicitação:</strong> {data_br}
-        </p>
+def email_solic_pesquisa(email, username, acao_realizada, data):
+    url = "http://127.0.0.1:8000/user/minhas_solic_pesq/"
 
-        <br>
-        <p style="font-size: 14px; color:#555;">
-            Atenciosamente<br>
-            <strong>SEMA - ECO Permis</strong>
-        </p>
+    mensagem_html = f"""
+    <html>
+    <body style="margin:0; padding:0; font-family: Arial, sans-serif; background:#f4f6f8;">
+
+        <div style="max-width:600px; margin:40px auto; background:#ffffff;
+                    padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+
+            <h2 style="color:#2980b9; text-align:center;">
+                Solicitação de Pesquisa Recebida
+            </h2>
+
+            <p style="font-size:16px;">Olá,</p>
+
+            <p style="font-size:15px;">
+                Sua solicitação de pesquisa foi <strong>recebida com sucesso</strong> e já está em análise pela gestão responsável.
+            </p>
+
+            <div style="background:#eef5fb; padding:15px; border-radius:6px;
+                        border-left:5px solid #2980b9; margin:20px 0;">
+
+                <strong>Detalhes da solicitação:</strong><br><br>
+
+                <strong>Solicitante:</strong> {username}<br>
+                <strong>Ação a ser realizada:</strong> {acao_realizada}<br>
+                <strong>Data da solicitação:</strong> {data}
+
+            </div>
+
+            <p style="font-size:15px;">
+                O prazo para avaliação é de até <strong>7 dias úteis</strong>.
+                Assim que o processo for concluído, você receberá um novo e-mail com o resultado.
+            </p>
+
+            <div style="text-align:center; margin:25px 0;">
+                <a href="{url}"
+                   style="background:#2c3e50; color:#ffffff; padding:12px 25px;
+                          text-decoration:none; border-radius:5px; font-weight:bold;">
+                   Acompanhar solicitação
+                </a>
+            </div>
+
+            <p style="font-size:15px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Gestão de UCs</strong>
+            </p>
+
+            <hr style="margin-top:30px; border:none; border-top:1px solid #eee;">
+
+            <p style="font-size:12px; color:#888; text-align:center;">
+                Este é um e-mail automático. Por favor, não responda.
+            </p>
+
+        </div>
 
     </body>
-  </html>
-  """
+    </html>
+    """
 
-  try:
-    email = EmailMultiAlternatives(
-            subject=assunto,
-            body=texto_simples,
-            from_email=settings.EMAIL_HOST_USER,
-            to=destinatarios
-    )
+    mensagem_texto = f"""
+        Solicitação de pesquisa recebida
 
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-    return True
+        Solicitante: {username}
+        Ação a ser realizada: {acao_realizada}
+        Data da solicitação: {data}
 
-  except Exception as e:
-    messages.error(request, f'ocorreu um erro: {e}')
-    return False
+        Sua solicitação foi recebida e está em análise pela gestão responsável.
+        O prazo para avaliação é de até 7 dias úteis.
 
-def email_solic_ugai(request, username, acao_realizada, data):
-  assunto = "STATUS: Aguardando aprovação"
-  texto_simples = "Sua pesquisa foi solicitada com sucesso!"
-  destinatarios = ['wilianaraujo407@gmail.com']
-  html_content = f"""
-  <html>
-      <body style="font-family: Arial, sans-serif; color: #333;">
+        Acompanhe sua solicitação:
+        {url}
 
-          <h2 style="color:#2c3e50;">
-              Pesquisa Solicitada com Sucesso!
-          </h2>
+        Equipe de Gestão de UCs
+        Este é um e-mail automático. Por favor, não responda.
+        """
 
-          <p style="font-size: 15px;">
-              <strong>Solicitante:</strong> {username}<br>
-              <strong>Ação a ser realizada:</strong> {acao_realizada}<br>
-              <strong>Data da solicitação:</strong> {data}
-          </p>
+    subject = "Sua solicitação de pesquisa foi recebida"
 
-          <br>
-          <p style="font-size: 14px; color:#555;">
-              Atenciosamente<br>
-              <strong>SEMA - ECO Permis</strong>
-          </p>
+    send_email.delay(email, mensagem_texto, mensagem_html, subject)
 
-      </body>
-  </html>
-  """
-  try:
-    email = EmailMultiAlternatives(
-          subject=assunto,
-          body=texto_simples,
-          from_email=settings.EMAIL_HOST_USER,
-          to=destinatarios
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-    return True
+def email_solic_ugai(email, username, ativ_desenv, data_br):
+    url = "http://127.0.0.1:8000/user/minhas_solic_ugai/"
 
-  except Exception as e:
-    messages.error(request, f'ocorreu um erro: {e}')
-    return False
+    mensagem_html = f"""
+    <html>
+    <body style="margin:0; padding:0; font-family: Arial, sans-serif; background:#f4f6f8;">
 
-def email_pesq_aprov(request, username):
-  assunto = "STATUS: pesquisa aprovada com sucesso!"
-  texto_simples = "Sua pesquisa foi aprovada com sucesso!"
-  destinatarios = ['wilianaraujo407@gmail.com']
-  html_content = f"""
-  <html>
-      <body style="font-family: Arial, sans-serif; color: #333;">
+        <div style="max-width:600px; margin:40px auto; background:#ffffff;
+                    padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
 
-          <h2 style="color:#2c3e50;">
-              Pesquisa aprovada!
-          </h2>
+            <h2 style="color:#2980b9; text-align:center;">
+                Solicitação de Uso de UGAI Recebida
+            </h2>
 
-          <p style="font-size: 15px;">
-              <strong>Gestor responsavel:</strong> {username}<br>
-          </p>
+            <p style="font-size:16px;">Olá,</p>
 
-          <br>
-          <p style="font-size: 14px; color:#555;">
-              Atenciosamente<br>
-              <strong>SEMA - ECO Permis</strong>
-          </p>
+            <p style="font-size:15px;">
+                Sua solicitação para <strong>utilização de UGAI</strong> foi recebida com sucesso
+                e já está em análise pela gestão responsável.
+            </p>
 
-      </body>
-  </html>
-  """
-  try:
-    email = EmailMultiAlternatives(
-          subject=assunto,
-          body=texto_simples,
-          from_email=settings.EMAIL_HOST_USER,
-          to=destinatarios
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-    return True
+            <div style="background:#eef5fb; padding:15px; border-radius:6px;
+                        border-left:5px solid #2980b9; margin:20px 0;">
 
-  except Exception as e:
-    messages.error(request, f'ocorreu um erro: {e}')
-    return False
+                <strong>Detalhes da solicitação:</strong><br><br>
 
-def email_ugai_aprov(request, username):
-  assunto = "STATUS: Solicitação para uso de UGAI"
-  texto_simples = "Sua solicitação para uso de UGAI foi aprovada com sucesso!"
-  destinatarios = ['wilianaraujo407@gmail.com']
-  html_content = f"""
-  <html>
-      <body style="font-family: Arial, sans-serif; color: #333;">
+                <strong>Solicitante:</strong> {username}<br>
+                <strong>Atividade a desenvolver:</strong> {ativ_desenv}<br>
+                <strong>Data da solicitação:</strong> {data_br}
 
-          <h2 style="color:#2c3e50;">
-              Uso de ugai aprovado!
-          </h2>
+            </div>
 
-          <p style="font-size: 15px;">
-              <strong>Gestor responsavel:</strong> {username}<br>
-          </p>
+            <p style="font-size:15px;">
+                O prazo para avaliação é de até <strong>7 dias úteis</strong>.
+                Você receberá um novo e-mail assim que a análise for concluída.
+            </p>
 
-          <br>
-          <p style="font-size: 14px; color:#555;">
-              Atenciosamente<br>
-              <strong>SEMA - ECO Permis</strong>
-          </p>
+            <div style="text-align:center; margin:25px 0;">
+                <a href="{url}"
+                   style="background:#2c3e50; color:#ffffff; padding:12px 25px;
+                          text-decoration:none; border-radius:5px; font-weight:bold;">
+                   Acompanhar solicitação
+                </a>
+            </div>
 
-      </body>
-  </html>
-  """
-  try:
-    email = EmailMultiAlternatives(
-          subject=assunto,
-          body=texto_simples,
-          from_email=settings.EMAIL_HOST_USER,
-          to=destinatarios
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-    return True
+            <p style="font-size:15px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Gestão de UGAIs</strong>
+            </p>
 
-  except Exception as e:
-    messages.error(request, f'ocorreu um erro: {e}')
-    return False
+            <hr style="margin-top:30px; border:none; border-top:1px solid #eee;">
+
+            <p style="font-size:12px; color:#888; text-align:center;">
+                Este é um e-mail automático. Por favor, não responda.
+            </p>
+
+        </div>
+
+    </body>
+    </html>
+    """
+
+    mensagem_texto = f"""
+        Solicitação de uso de UGAI recebida
+
+        Solicitante: {username}
+        Atividade a desenvolver: {ativ_desenv}
+        Data da solicitação: {data_br}
+
+        Sua solicitação foi recebida e está em análise pela gestão responsável.
+        O prazo de avaliação é de até 7 dias úteis.
+
+        Acompanhe sua solicitação:
+        {url}
+
+        Equipe de Gestão de UGAIs
+        Este é um e-mail automático. Por favor, não responda.
+        """
+
+    subject = "Sua solicitação de UGAI foi recebida"
+
+    send_email.delay(email, mensagem_texto, mensagem_html, subject)
+
+def email_equipe_pesq(email, solicitante, id_pesq):
+    url = f"http://127.0.0.1:8000/user/conf_email_equip/{id_pesq}/"
+
+    mensagem_html = f"""
+    <html>
+    <body style="margin:0; padding:0; font-family: Arial, sans-serif; background:#f4f6f8;">
+
+        <div style="max-width:600px; margin:40px auto; background:#ffffff;
+                    padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+
+            <h2 style="color:#2980b9; text-align:center;">
+                Convite para participar de pesquisa
+            </h2>
+
+            <p style="font-size:16px;">
+                Olá,
+            </p>
+
+            <p style="font-size:15px;">
+                Você foi <strong>convidado para participar de uma equipe de pesquisa</strong>
+                no sistema de Gestão de UCs.
+            </p>
+
+            <div style="background:#eef5fb; padding:15px; border-radius:6px;
+                        border-left:5px solid #2980b9; margin:20px 0;">
+
+                <strong>Detalhes do convite:</strong><br><br>
+
+                <strong>Solicitante:</strong> {solicitante}<br>
+                <strong>Status:</strong> Aguardando confirmação do membro da equipe
+
+            </div>
+
+            <p style="font-size:15px;">
+                Para confirmar sua participação nesta pesquisa, clique no botão abaixo
+                e autorize sua inclusão como membro da equipe.
+            </p>
+
+            <div style="text-align:center; margin:30px 0;">
+                <a href="{url}"
+                   style="background:#27ae60; color:#ffffff; padding:14px 28px;
+                          text-decoration:none; border-radius:6px; font-weight:bold;
+                          font-size:16px;">
+                   Confirmar participação
+                </a>
+            </div>
+
+            <p style="font-size:15px;">
+                Caso você não reconheça esta solicitação, basta ignorar este e-mail.
+            </p>
+
+            <p style="font-size:15px;">
+                Atenciosamente,<br>
+                <strong>Equipe de Gestão de UCs</strong>
+            </p>
+
+            <hr style="margin-top:30px; border:none; border-top:1px solid #eee;">
+
+            <p style="font-size:12px; color:#888; text-align:center;">
+                Este é um e-mail automático. Por favor, não responda.
+            </p>
+
+        </div>
+
+    </body>
+    </html>
+    """
+
+    mensagem_texto = f"""
+        Convite para participar de pesquisa
+
+        Você foi convidado por {solicitante} para participar de uma equipe de pesquisa.
+
+        Para confirmar sua participação, acesse o link abaixo:
+        {url}
+
+        Caso não reconheça esta solicitação, ignore este e-mail.
+
+        Equipe de Gestão de UCs
+        Este é um e-mail automático. Não responda.
+        """
+
+    subject = "Convite para participar de equipe de pesquisa"
+    send_email.delay(email, mensagem_texto, mensagem_html, subject)
+
+    return

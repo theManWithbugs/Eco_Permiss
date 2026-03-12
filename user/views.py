@@ -15,7 +15,7 @@ from core.models import *
 from .forms import *
 
 from .utils import *
-from core.utils import *
+from core.utils import calcular_data
 
 def dados_pessoais_required(view_func):
     #usar wraps para evitar: quebrar reverse, perder o nome da view, quebrar permissões e logs
@@ -139,6 +139,9 @@ def realizar_solic(request):
 
     dados_user = get_object_or_404(DadosPessoais, usuario=request.user)
 
+    email_to_send = DadosPessoais.objects.filter(usuario=request.user).first().email
+    username = request.user.username
+
     MembroEquipeFormset = inlineformset_factory(
         DadosSolicPesquisa, MembroEquipe, form=MembroEquipeForm,
         extra=1, can_delete=True
@@ -168,10 +171,13 @@ def realizar_solic(request):
                         messages.success(request, 'Pesquisa solicitada com sucesso!')
 
                         data = format_data_br(str(obj_paiSaved.data_solicitacao))
-                        username = request.user.username
+
                         acao_realizada = obj_paiSaved.acao_realizada
 
-                        email_solic_ugai(request, username, acao_realizada, data)
+                        esquipe = MembroEquipe.objects.filter(pesquisa=obj_paiSaved.id)
+                        for x in esquipe: email_equipe_pesq(x.email, user, obj_paiSaved.id)
+
+                        email_solic_pesquisa(email_to_send, username, acao_realizada, data)
                         return redirect('user:realizar_solic')
                     except Exception as e:
                         messages.error(request, f'Ocorreu um erro ao salvar os membros: {e}')
@@ -196,10 +202,9 @@ def realizar_solic(request):
                     data_hoje = date.today()
                     data_br = data_hoje.strftime('%d/%m/%Y')
 
-                    username = request.user.username
                     ativ_desenv = obj.ativ_desenv
 
-                    email_solic_ugai(request, username, ativ_desenv, data_br)
+                    email_solic_ugai(email_to_send, username, ativ_desenv, data_br)
                     return redirect('user:realizar_solic')
                 except Exception as e:
                     messages.error(request, f'Ocorreu um erro ao salvar a solicitação UGAI: {e}')
@@ -214,6 +219,10 @@ def realizar_solic(request):
     }
 
     return render(request, template_name, context)
+
+def confirm_email_equip(request, id):
+    template_name = 'user/include/aut_equip.html'
+    return render(request, template_name)
 
 @login_required
 def info_pesquisa(request, id):
