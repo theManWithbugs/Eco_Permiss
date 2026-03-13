@@ -133,7 +133,7 @@ def logoutView(request):
 @login_required
 @has_permiss
 def info_pesquisa(request, id):
-  template_name = 'core/include/info_pesq_adm.html'
+  template_name = 'core/include/info_pesq.html'
 
   obj = get_object_or_404(DadosSolicPesquisa, id=id)
   documentos = ArquivosRelFinal.objects.filter(pesquisa=obj)
@@ -276,7 +276,7 @@ def resp_list_pesq(request):
 
   status = request.GET.get('status')
 
-  dados = DadosSolicPesquisa.objects.filter(status=status).order_by('-data_solicitacao')
+  dados = DadosSolicPesquisa.objects.filter(status=status).order_by('data_solicitacao')
 
   page_number = request.GET.get('page', 1)
   paginator = Paginator(dados, 5)
@@ -313,7 +313,7 @@ def resp_list_ugai(request):
 
   status = request.GET.get('status')
 
-  dados = SolicitacaoUgais.objects.filter(status=status).order_by('-data_solicitacao')
+  dados = SolicitacaoUgais.objects.filter(status=status).order_by('data_solicitacao')
 
   page_number = request.GET.get('page', 1)
   paginator = Paginator(dados, 5)

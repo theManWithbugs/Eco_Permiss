@@ -69,7 +69,7 @@ function render_items(items) {
   })
 }
 
-function carregarPagina(numeroDaPagina, newStatus) {
+function carregarPagina(numeroDaPagina, newStatus = currentStatus) {
   fetch(`/manager/api_resp_ugai/?status=${newStatus}&page=${numeroDaPagina}`, {
     method: 'GET',
   })

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout as auth_logout
 from functools import wraps
-from datetime import date
+from datetime import date, datetime
 from django.forms import inlineformset_factory, model_to_dict
 
 from core.models import *
@@ -16,6 +16,68 @@ from .forms import *
 
 from .utils import *
 from core.utils import calcular_data
+
+# =========================
+# SUCCESS
+# =========================
+def response_200(message='Operação realizada com sucesso', data=None):
+    return JsonResponse({
+        'message': message,
+        'data': data
+    }, status=200)
+
+def response_201(message='Recurso criado com sucesso', data=None):
+    return JsonResponse({
+        'message': message,
+        'data': data
+    }, status=201)
+
+def response_204():
+    return JsonResponse({}, status=204)
+
+# =========================
+# CLIENT ERRORS
+# =========================
+
+def response_400(message='Solicitação inválida'):
+    return JsonResponse({'message': message}, status=400)
+
+
+def response_401(message='Usuário não autorizado'):
+    return JsonResponse({'message': message}, status=401)
+
+
+def response_403(message='Acesso proibido'):
+    return JsonResponse({'message': message}, status=403)
+
+
+def response_404(message='Recurso não encontrado'):
+    return JsonResponse({'message': message}, status=404)
+
+
+def response_405(message='Método não permitido'):
+    return JsonResponse({'message': message}, status=405)
+
+
+def response_409(message='Conflito na requisição'):
+    return JsonResponse({'message': message}, status=409)
+
+
+def response_422(message='Erro de validação'):
+    return JsonResponse({'message': message}, status=422)
+
+
+# =========================
+# SERVER ERRORS
+# =========================
+
+def response_500(message='Erro interno do servidor'):
+    return JsonResponse({'message': message}, status=500)
+
+
+def response_503(message='Serviço temporariamente indisponível'):
+    return JsonResponse({'message': message}, status=503)
+
 
 def dados_pessoais_required(view_func):
     #usar wraps para evitar: quebrar reverse, perder o nome da view, quebrar permissões e logs
@@ -174,8 +236,10 @@ def realizar_solic(request):
 
                         acao_realizada = obj_paiSaved.acao_realizada
 
+                        #To send email
                         esquipe = MembroEquipe.objects.filter(pesquisa=obj_paiSaved.id)
-                        for x in esquipe: email_equipe_pesq(x.email, user, obj_paiSaved.id)
+                        for x in esquipe: email_equipe_pesq(x.email, user, x.token_confirmacao)
+                        esquipe.update(email_enviado=True)
 
                         email_solic_pesquisa(email_to_send, username, acao_realizada, data)
                         return redirect('user:realizar_solic')
@@ -220,9 +284,34 @@ def realizar_solic(request):
 
     return render(request, template_name, context)
 
-def confirm_email_equip(request, id):
+def confirm_email_equip(request, token):
     template_name = 'user/include/aut_equip.html'
-    return render(request, template_name)
+
+    obj = get_object_or_404(MembroEquipe, token_confirmacao=token)
+
+    # Já confirmado — não permite reprocessar
+    if obj.confirmado:
+        messages.info(request, "Você já confirmou sua participação anteriormente.")
+        return render(request, template_name, {'obj': obj, 'token': token, 'ja_confirmado': True})
+
+    if request.method == "POST":
+        rg_digitado = request.POST.get('rg', '').strip().upper()
+
+        if rg_digitado == obj.rg:
+            obj.confirmar()
+            messages.success(request, "Participação confirmada com sucesso!")
+            return redirect('user:confirm_email_equip', token=token)
+        else:
+            messages.error(request, "RG inválido. Tente novamente.")
+            return redirect('user:confirm_email_equip', token=token)
+
+    context = {
+        'obj': obj,
+        'token': token,
+        'ja_confirmado': False,
+    }
+
+    return render(request, template_name, context)
 
 @login_required
 def info_pesquisa(request, id):
@@ -339,7 +428,6 @@ def minhas_solic_ugai(request):
     return render(request, template_name)
 
 #API Views
-
 def api_minhas_solic(request):
     if not request.user.is_authenticated:
         return JsonResponse(

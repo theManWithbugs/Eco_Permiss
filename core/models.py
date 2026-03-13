@@ -127,7 +127,6 @@ class MembroEquipe(models.Model):
     instituicao = models.CharField(
         blank=False, null=False, verbose_name='Instituições', max_length=80)
     email = models.CharField(max_length=80, blank=False, null=False, verbose_name='Email')
-
     email_enviado = models.BooleanField(default=False)
     confirmado = models.BooleanField(default=False)
     token_confirmacao = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
