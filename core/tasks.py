@@ -18,3 +18,18 @@ def send_email(email, mensagem_texto, mensagem_html, subject):
         fail_silently=False,
         html_message=mensagem_html
     )
+
+@shared_task
+def check_data():
+
+    from .models import DadosSolicPesquisa
+    from datetime import date
+
+    hoje = date.today()
+
+    atualizados = DadosSolicPesquisa.objects.filter(
+        status="PENDENTE",
+        final_atividade__lt=hoje # __lt significa "menor que" (less than)
+    ).update(status="ENCERRADO")
+
+    print(f"{atualizados} registros foram encerrados em {hoje}.")

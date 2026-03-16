@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout as auth_logout
 from functools import wraps
-from datetime import date, datetime
+from datetime import date
 from django.forms import inlineformset_factory, model_to_dict
 
 from core.models import *
@@ -291,7 +291,7 @@ def confirm_email_equip(request, token):
 
     # Já confirmado — não permite reprocessar
     if obj.confirmado:
-        messages.info(request, "Você já confirmou sua participação anteriormente.")
+        # messages.info(request, "Você já confirmou sua participação anteriormente.")
         return render(request, template_name, {'obj': obj, 'token': token, 'ja_confirmado': True})
 
     if request.method == "POST":

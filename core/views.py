@@ -15,6 +15,7 @@ from django.db import transaction
 from core.models import *
 from core.utils import calcular_data, email_pesq_aprov, email_ugai_aprov, email_recus_pesq, email_recus_ugai
 from core.forms import *
+from .tasks import *
 
 #from rest framework to use JS fetch
 import json
@@ -139,6 +140,9 @@ def info_pesquisa(request, id):
   documentos = ArquivosRelFinal.objects.filter(pesquisa=obj)
   membro_equip = MembroEquipe.objects.filter(pesquisa=obj)
 
+  #Any verifica se ao menos um valor da condição seja encontrado, então o status é True
+  check = any(x.confirmado for x in membro_equip)
+
   inicio = obj.inicio_atividade
   final = obj.final_atividade
 
@@ -149,7 +153,8 @@ def info_pesquisa(request, id):
     'obj': obj,
     'documentos': documentos,
     'duracao_pesq': duracao_pesq,
-    'membro_equip': membro_equip
+    'membro_equip': membro_equip,
+    'check': check
   }
 
   return render(request, template_name, context)

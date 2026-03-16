@@ -2,6 +2,7 @@ from django.contrib.messages import constants as messages
 from decouple import config
 from pathlib import Path
 from decouple import config, Csv
+from celery.schedules import crontab
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -127,3 +128,10 @@ CELERY_TASK_SERIALIZER = "json"
 
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 SERVER_EMAIL = config('DEFAULT_FROM_EMAIL')
+
+CELERY_BEAT_SCHEDULE = {
+    'verificar-dados-diariamente': {
+        'task': 'core.tasks.check_data', # Caminho completo da task
+        'schedule': crontab(hour=0, minute=5),      # Roda todo dia às 00:05
+    },
+}
