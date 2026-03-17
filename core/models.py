@@ -36,7 +36,7 @@ class DadosPessoais(models.Model):
         blank=False, null=False, max_length=30, verbose_name='Orgão emissor(RG)')
     cpf = models.CharField(blank=False, null=False, validators=[
                            validador_cpf], max_length=11, verbose_name='CPF')
-    telefone_fixo = models.CharField(blank=True, null=True, max_length=8, default='NA')
+    telefone_fixo = models.CharField(blank=True, null=True, max_length=8)
 
     cep = models.CharField(blank=False, null=False,
                            max_length=8, verbose_name='CEP')
@@ -97,8 +97,7 @@ class DadosSolicPesquisa(models.Model):
     area_atuacao = models.CharField(
         choices=CHOICES_AREA_ATUACAO, blank=False, null=False, verbose_name='Aréa de atuação', max_length=100)
 
-    gestor_resp =  models.CharField(
-        default='NA', max_length=80, verbose_name='Gestor responsavel:')
+    gestor_resp =  models.CharField(max_length=80, verbose_name='Gestor responsavel:', blank=True, null=True)
 
     recusa_motivo = models.CharField(max_length=400, blank=True, null=True)
 
@@ -204,9 +203,9 @@ class SolicitacaoUgais(models.Model):
 
     quantidade_pessoas = models.PositiveIntegerField()
 
-    instituicao = models.CharField(max_length=40, blank=True, null=True, verbose_name='Instituição', default='NA')
-    setor = models.CharField(max_length=40, blank=True, null=True, default='NA')
-    cargo = models.CharField(max_length=40, blank=True, null=True, default='NA')
+    instituicao = models.CharField(max_length=40, blank=True, null=True, verbose_name='Instituição')
+    setor = models.CharField(max_length=40, blank=True, null=True)
+    cargo = models.CharField(max_length=40, blank=True, null=True)
 
     ativ_desenv = models.CharField(max_length=80, blank=False, null=False, verbose_name='Atividades que irá desenvolver')
     publico_alvo = models.CharField(max_length=80, blank=False, null=False, verbose_name='Público alvo')
