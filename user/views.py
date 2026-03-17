@@ -137,6 +137,7 @@ def login_view(request):
   return render(request, template_name, {'next': next_url})
 
 @login_required
+@dados_pessoais_required
 def perfil(request):
     template_name = 'user/auth/perfil.html'
 
